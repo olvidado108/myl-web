@@ -46,8 +46,10 @@ http://localhost:3000
 
 ## 📚 Documentación del Proyecto
 
+- **[GAME_RULES.md](./GAME_RULES.md)** - ⭐ **Reglas oficiales del juego** (LEER PRIMERO)
 - **[PROGRESS.md](./PROGRESS.md)** - Estado actual, fases completadas y pendientes
 - **[ROADMAP.md](./ROADMAP.md)** - Plan detallado de desarrollo por fases
+- **[IMPLEMENTATION_NOTES.md](./IMPLEMENTATION_NOTES.md)** - Notas sobre cómo implementar las reglas
 - **[CHANGELOG.md](./CHANGELOG.md)** - Historial de cambios importantes
 - **[BUGS.md](./BUGS.md)** - Registro de bugs conocidos y resueltos
 - **[IMPROVEMENTS.md](./IMPROVEMENTS.md)** - Mejoras sugeridas e ideas futuras

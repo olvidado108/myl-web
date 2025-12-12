@@ -44,6 +44,19 @@ verificar('Métodos de Card funcionan', () => {
     return carta2.nombre === carta.nombre && carta2.coste === carta.coste;
 });
 
+// 2.1. Verificar nuevos métodos de Card
+verificar('Métodos esAliado() y recibirDano() funcionan', () => {
+    const Carta = require('../models/Card');
+    const aliado = new Carta('test_002', 'Aliado Test', 'Aliado', 2, 3, 5, '', '');
+    const oro = new Carta('test_003', 'Oro Test', 'Oro', 0, 0, 0, '', '');
+    const destruido = aliado.recibirDano(5);
+    return aliado.esAliado() === true &&
+           oro.esAliado() === false &&
+           aliado.defensa === 0 &&
+           destruido === true &&
+           aliado.estaDestruido() === true;
+});
+
 // 3. Verificar que GameState se puede importar y usar
 verificar('Modelo GameState se puede importar', () => {
     const GameState = require('../models/GameState');
@@ -57,7 +70,31 @@ verificar('Métodos de GameState funcionan', () => {
     const estado = new GameState();
     const jugador = estado.getJugadorActual();
     estado.siguienteTurno();
-    return jugador.id === 'jugador1' && estado.turnoActual === 'jugador2';
+    // Verificar que tiene las nuevas áreas de juego
+    return jugador.id === 'jugador1' && 
+           estado.turnoActual === 'jugador2' &&
+           Array.isArray(jugador.lineaDefensa) &&
+           Array.isArray(jugador.reservaOro);
+});
+
+// 4.1. Verificar nuevo sistema de recursos
+verificar('Sistema de recursos funciona', () => {
+    const GameState = require('../models/GameState');
+    const estado = new GameState();
+    const jugador = estado.getJugadorActual();
+    jugador.reservaOro = [{id: 'oro1'}, {id: 'oro2'}];
+    estado.calcularRecursosTotales(jugador.id);
+    return jugador.recursos === 2 && jugador.recursosTotales === 2;
+});
+
+// 4.2. Verificar condición de victoria (mazo vacío)
+verificar('Condición de victoria verifica mazo vacío', () => {
+    const GameState = require('../models/GameState');
+    const estado = new GameState();
+    const oponente = estado.getOponente();
+    oponente.mazo = []; // Mazo vacío
+    const ganador = estado.verificarGanador();
+    return ganador === estado.turnoActual && estado.finalizado === true;
 });
 
 // 5. Verificar que las utilidades se pueden importar
