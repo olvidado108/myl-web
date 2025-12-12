@@ -13,7 +13,7 @@ class GameState {
                 id: jugador1Id,
                 // Sistema de mazo (Castillo) - objetivo: reducir a 0
                 mazo: [], // Mazo Castillo (50 cartas)
-                mano: [], // Cartas en mano (máximo 7 al final del turno)
+                mano: [], // Cartas en mano (máximo 8 después de la Fase de Robo)
                 // Áreas de juego según reglas oficiales
                 lineaDefensa: [], // Aliados
                 lineaApoyo: [], // Tótems y Armas
@@ -85,11 +85,11 @@ class GameState {
     }
 
     /**
-     * Verifica si el jugador tiene más de 7 cartas en mano
-     * (debe descartar al final del turno)
+     * Verifica si el jugador tiene más de 8 cartas en mano
+     * (debe descartar después de robar en la Fase de Robo)
      */
-    tieneMasDe7CartasEnMano(jugadorId) {
-        return this.jugadores[jugadorId].mano.length > 7;
+    tieneMasDe8CartasEnMano(jugadorId) {
+        return this.jugadores[jugadorId].mano.length > 8;
     }
 
     /**

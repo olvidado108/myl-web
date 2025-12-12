@@ -34,7 +34,7 @@ Este documento contiene notas importantes sobre cómo implementar las reglas del
 
 Cada jugador tiene:
 - `mazo`: Mazo Castillo (50 cartas)
-- `mano`: Cartas en mano (máximo 7 al final del turno)
+- `mano`: Cartas en mano (máximo 8 después de la Fase de Robo)
 - `lineaDefensa`: Aliados desplegados
 - `lineaApoyo`: Tótems y Armas
 - `reservaOro`: Oros que generan recursos
@@ -57,7 +57,7 @@ Cada jugador tiene:
 2. **robo**: Robar 1 carta del mazo (si está vacío, pierdes)
 3. **preparacion**: Jugar cartas (Oros, Aliados, Tótems, Armas, Talismanes)
 4. **batalla**: Aliados atacan o defienden
-5. **final**: Efectos de final, descartar si hay más de 7 cartas
+5. **final**: Efectos de final (el descarte ya se hizo en la Fase de Robo si había más de 8 cartas)
 
 ## ⚔️ Combate
 
@@ -113,7 +113,7 @@ if (oponente.lineaDefensa.length === 0) {
 - [ ] Implementar sistema de recursos (Oros)
 - [ ] Cambiar condición de victoria (mazo vacío)
 - [ ] Implementar descarte de cartas del mazo por daño
-- [ ] Implementar límite de 7 cartas en mano
+- [ ] Implementar límite de 8 cartas en mano (descartar después de robar si hay más de 8)
 - [ ] Implementar fases: robo, preparacion, batalla, final
 
 ### Actualizar Combate

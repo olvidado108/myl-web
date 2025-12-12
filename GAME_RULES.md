@@ -89,7 +89,7 @@ El objetivo es **reducir el mazo del oponente a cero cartas**, lo que simboliza 
 
 ### **Mano**
 - Cartas que el jugador tiene disponibles para jugar.
-- Máximo de cartas en mano: **7 cartas** (si tienes más, debes descartar al final del turno).
+- Máximo de cartas en mano: **8 cartas** (si tienes más después de robar, debes descartar hasta tener 8).
 
 ## 🔄 Fases del Turno
 
@@ -104,6 +104,8 @@ Cada turno se divide en las siguientes fases:
 ### 2. **Fase de Robo**
 - El jugador **roba una carta** del Mazo Castillo.
 - Si el mazo está vacío, el jugador pierde inmediatamente.
+- **IMPORTANTE:** Después de robar, si el jugador tiene **más de 8 cartas en mano**, debe **descartar cartas hasta tener exactamente 8 cartas**.
+- El descarte se realiza inmediatamente después de robar, en esta misma fase.
 
 ### 3. **Fase de Preparación**
 - Se pueden jugar cartas de **Oro** para generar recursos.
@@ -124,7 +126,7 @@ Cada turno se divide en las siguientes fases:
 
 ### 5. **Fase Final**
 - Se resuelven efectos que ocurren al final del turno.
-- Si el jugador tiene más de **7 cartas en mano**, debe descartar hasta tener 7.
+- **NOTA:** El descarte de cartas en exceso ya se realizó en la Fase de Robo (si había más de 8 cartas).
 - Se cambia al turno del oponente.
 
 ## ⚔️ Mecánicas de Combate
@@ -172,8 +174,10 @@ Muchas cartas poseen **habilidades especiales** que pueden activarse bajo cierta
 ## 📋 Reglas Adicionales
 
 ### Límite de Cartas en Mano
-- Máximo **7 cartas** en mano al final del turno.
-- Si tienes más, debes descartar hasta tener 7.
+- Máximo **8 cartas** en mano después de la Fase de Robo.
+- **IMPORTANTE:** El descarte ocurre **inmediatamente después de robar** en la Fase de Robo, no al final del turno.
+- Si después de robar tienes más de 8 cartas, debes descartar hasta tener exactamente 8 cartas.
+- Durante el turno del oponente, puedes tener temporalmente más de 8 cartas en mano (no hay descarte obligatorio fuera de tu turno).
 
 ### Robo de Cartas
 - Se roba **1 carta** al inicio de cada turno (Fase de Robo).
