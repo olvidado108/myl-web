@@ -5,7 +5,9 @@
   "main": "server/server.js",
   "scripts": {
     "start": "node server/server.js",
-    "dev": "node server/server.js"
+    "dev": "node server/server.js",
+    "test": "node server/test/verify-setup.js",
+    "verify": "node server/test/verify-setup.js"
   },
   "keywords": [
     "tcg",

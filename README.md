@@ -67,6 +67,25 @@ El proyecto usa un sistema de ramas por fase para mantener control sobre las imp
 3. Revisar y probar
 4. Hacer merge a `main` cuando esté completa y estable
 
+## ✅ Verificación del Proyecto
+
+Antes de comenzar a trabajar, puedes verificar que todo está configurado correctamente:
+
+```bash
+npm test
+```
+
+Esto ejecutará verificaciones de:
+- Modelos de datos (Card, GameState)
+- Utilidades del juego
+- Mazo de demostración
+- Integración de componentes
+
+También puedes ver un ejemplo de uso:
+```bash
+node server/test/example-usage.js
+```
+
 ## 🚀 Próximos Pasos (Fase 1)
 
 - Implementar lógica básica del juego en consola
