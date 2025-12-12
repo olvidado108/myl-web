@@ -101,6 +101,13 @@ if (oponente.lineaDefensa.length === 0) {
 - [ ] Cambiar mazo de 30 a 50 cartas (Castillo)
 - [ ] Añadir más cartas de tipo "Oro"
 - [ ] Añadir cartas de tipo "Totem" y "Arma"
+- [ ] **IMPORTANTE:** Implementar sistema de **Oro Inicial** obligatorio
+  - [ ] Crear tipo de carta "Oro Inicial"
+  - [ ] Validar que el mazo incluya 1 Oro Inicial
+  - [ ] Al inicio de partida, colocar Oro Inicial en Reserva de Oro automáticamente
+- [ ] Implementar validación de **número mínimo de Aliados**
+- [ ] Implementar sistema de **formatos** (Racial Edición, Racial Soporte Libre)
+- [ ] Implementar validación de **razas** y **ediciones** según formato
 
 ### Actualizar Lógica de Juego
 - [ ] Implementar sistema de recursos (Oros)
@@ -114,17 +121,48 @@ if (oponente.lineaDefensa.length === 0) {
 - [ ] Sistema de ataque al Castillo (descarta del mazo)
 - [ ] Movimiento de Aliados destruidos al cementerio
 
+### Sistema de Armas
+- [ ] Implementar regla: **1 Arma por Aliado** (por defecto)
+- [ ] Verificar habilidades especiales que permitan múltiples armas
+- [ ] Validar al equipar: si el Aliado ya tiene arma y no tiene habilidad especial → bloquear
+
 ## 🎮 Simplificaciones Iniciales
 
 Para la Fase 1 (prototipo en consola), podemos simplificar:
 
 1. **Oros**: Cada Oro genera 1 recurso (sin variaciones)
-2. **Talismanes**: Efectos básicos (daño, curación, robo)
-3. **Tótems**: Efectos continuos simples
-4. **Armas**: Aumentan ataque/defensa de Aliados (+1/+1 básico)
-5. **Habilidades**: Implementar solo las más básicas
+2. **Oro Inicial**: Implementar como tipo especial de Oro que ya está en Reserva de Oro al inicio
+3. **Talismanes**: Efectos básicos (daño, curación, robo)
+4. **Tótems**: Efectos continuos simples
+5. **Armas**: Aumentan ataque/defensa de Aliados (+1/+1 básico)
+6. **Habilidades**: Implementar solo las más básicas
+7. **Formatos**: Implementar validación básica (puede simplificarse inicialmente)
+
+**IMPORTANTE - NO Simplificar:**
+- ❌ Oro Inicial obligatorio (debe implementarse correctamente)
+- ❌ Regla de 1 Arma por Aliado (debe implementarse correctamente)
+- ❌ Validación de mazo de 50 cartas (debe implementarse correctamente)
 
 Las mecánicas más complejas se añadirán en fases posteriores.
+
+## 🆕 Reglas Críticas Añadidas
+
+### Oro Inicial
+- **OBLIGATORIO** en cada mazo
+- Ya está en Reserva de Oro al inicio de la partida
+- No se roba del mazo, ya está desplegado
+
+### Número Mínimo de Aliados
+- Validar que el mazo tenga suficientes Aliados
+- Típicamente 15-20 Aliados mínimo
+
+### Formatos de Juego
+- **Racial Edición**: Raza + soporte solo de edición original
+- **Racial Soporte Libre**: Raza + soporte de cualquier edición del formato
+
+### Armas
+- **1 Arma por Aliado** (regla general)
+- Excepción: Aliados con habilidades especiales pueden tener más
 
 ---
 
