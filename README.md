@@ -2,9 +2,12 @@
 
 Juego de cartas coleccionable (TCG) para navegador web, inspirado en "Mitos y Leyendas".
 
-## Estado del Proyecto
+## 📊 Estado del Proyecto
 
-**Fase 0: Preparación y Arquitectura** ✅ Completada
+**Fase Actual:** Fase 0 ✅ Completada  
+**Próxima Fase:** Fase 1 - Prototipo Jugable en Consola
+
+👉 **Ver [PROGRESS.md](./PROGRESS.md) para el estado detallado del proyecto**
 
 ## Estructura del Proyecto
 
@@ -41,14 +44,39 @@ npm start
 http://localhost:3000
 ```
 
-## Próximos Pasos (Fase 1)
+## 📚 Documentación del Proyecto
+
+- **[PROGRESS.md](./PROGRESS.md)** - Estado actual, fases completadas y pendientes
+- **[ROADMAP.md](./ROADMAP.md)** - Plan detallado de desarrollo por fases
+- **[CHANGELOG.md](./CHANGELOG.md)** - Historial de cambios importantes
+- **[BUGS.md](./BUGS.md)** - Registro de bugs conocidos y resueltos
+- **[IMPROVEMENTS.md](./IMPROVEMENTS.md)** - Mejoras sugeridas e ideas futuras
+
+## 🌿 Estrategia de Ramas Git
+
+El proyecto usa un sistema de ramas por fase para mantener control sobre las implementaciones:
+
+- **`main`** - Código estable y probado (producción)
+- **`fase-1`** - Desarrollo de Fase 1 (Prototipo en Consola)
+- **`fase-2`** - Desarrollo de Fase 2 (Interfaz Gráfica)
+- **`fase-3`** - Desarrollo de Fase 3 (Funcionalidades Completas)
+
+**Flujo de trabajo:**
+1. Crear rama `fase-X` desde `main`
+2. Trabajar en la fase correspondiente
+3. Revisar y probar
+4. Hacer merge a `main` cuando esté completa y estable
+
+## 🚀 Próximos Pasos (Fase 1)
 
 - Implementar lógica básica del juego en consola
-- Sistema de barajar y repartir cartas
+- Sistema de barajar y repartir cartas ✅ Ya implementado
 - Bucle de juego por turnos
 - IA básica para oponente automático
 
-## Nota Legal
+Ver [ROADMAP.md](./ROADMAP.md) para el plan completo.
+
+## ⚖️ Nota Legal
 
 Este es un proyecto personal/educativo. Para uso comercial se requeriría licencia de Fenix Entertainment.
 
