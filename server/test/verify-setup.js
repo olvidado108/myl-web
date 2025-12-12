@@ -91,10 +91,15 @@ verificar('Sistema de recursos funciona', () => {
 verificar('Condición de victoria verifica mazo vacío', () => {
     const GameState = require('../models/GameState');
     const estado = new GameState();
+    const jugadorActual = estado.getJugadorActual();
     const oponente = estado.getOponente();
-    oponente.mazo = []; // Mazo vacío
+    // Asegurar que el jugador actual tiene cartas
+    jugadorActual.mazo = [1, 2, 3];
+    // El oponente tiene mazo vacío (pierde)
+    oponente.mazo = [];
     const ganador = estado.verificarGanador();
-    return ganador === estado.turnoActual && estado.finalizado === true;
+    // El ganador debe ser el jugador actual (porque el oponente perdió)
+    return ganador === jugadorActual.id && estado.finalizado === true;
 });
 
 // 5. Verificar que las utilidades se pueden importar
