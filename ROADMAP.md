@@ -35,12 +35,21 @@ Crear un juego de cartas coleccionable (TCG) para navegador web, inspirado en "M
 
 **Tareas Detalladas:**
 
+0. **Repositorio de Cartas**
+   - [ ] Crear sistema de repositorio de cartas (CardRepository)
+   - [ ] Implementar almacenamiento de cartas (JSON/Base de datos)
+   - [ ] Funciones de búsqueda: por ID, tipo, raza, edición, nombre
+   - [ ] Funciones de filtrado: por formato, por restricciones
+   - [ ] Validación de cartas (estructura, campos requeridos)
+   - [ ] Cargar cartas desde archivos/BD
+   - [ ] Sistema de metadatos de cartas (edición, raza, rareza, etc.)
+
 1. **Lógica Básica en Node.js**
    - [ ] Función para barajar mazo (Fisher-Yates) ✅ Ya existe
    - [ ] Función para repartir cartas iniciales ✅ Ya existe
    - [ ] Bucle de juego por turnos
-   - [ ] Sistema de fases de turno (inicio, principal, combate, final)
-   - [ ] Gestión de maná por turno
+   - [ ] Sistema de fases de turno (inicio, robo, preparación, batalla, final)
+   - [ ] Gestión de recursos (Oros)
    - [ ] Sistema de robar cartas
 
 2. **Sistema de Comandos**
@@ -71,6 +80,8 @@ Crear un juego de cartas coleccionable (TCG) para navegador web, inspirado en "M
 **Hito:** Poder jugar una partida completa (1 jugador vs IA) escribiendo comandos en la terminal.
 
 **Archivos a Crear/Modificar:**
+- `server/repository/CardRepository.js` - Repositorio de cartas (búsqueda, filtrado, validación)
+- `server/data/cards/` - Carpeta con archivos JSON de cartas por edición
 - `server/game/GameEngine.js` - Motor del juego
 - `server/game/CommandHandler.js` - Procesador de comandos
 - `server/game/AI.js` - IA básica

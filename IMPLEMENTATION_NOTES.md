@@ -97,6 +97,30 @@ if (oponente.lineaDefensa.length === 0) {
 
 ## 📋 Tareas Pendientes para Fase 1
 
+### Repositorio de Cartas (PRIORITARIO)
+- [ ] Crear clase `CardRepository` para gestionar todas las cartas
+- [ ] Implementar almacenamiento de cartas:
+  - Opción 1: Archivos JSON por edición (`server/data/cards/edicion_helenica.json`, etc.)
+  - Opción 2: Base de datos (SQLite para desarrollo, PostgreSQL para producción)
+- [ ] Funciones de búsqueda:
+  - `buscarPorId(id)` - Buscar carta por ID único
+  - `buscarPorNombre(nombre)` - Búsqueda por nombre (parcial o exacta)
+  - `buscarPorTipo(tipo)` - Filtrar por tipo (Aliado, Talisman, Oro, etc.)
+  - `buscarPorRaza(raza)` - Filtrar por raza (Olímpico, Nórdico, etc.)
+  - `buscarPorEdicion(edicion)` - Filtrar por edición
+  - `buscarPorFormato(formato)` - Filtrar cartas permitidas en un formato
+- [ ] Funciones de validación:
+  - `validarCarta(carta)` - Verificar estructura y campos requeridos
+  - `esCartaValida(carta, formato)` - Verificar si carta es válida para formato
+- [ ] Sistema de metadatos:
+  - Edición de la carta
+  - Raza (para Aliados)
+  - Rareza (común, rara, épica, legendaria)
+  - Formato(s) permitido(s)
+  - Restricciones (prohibida, limitada, etc.)
+- [ ] Cargar cartas al inicio del servidor
+- [ ] Cachear cartas en memoria para acceso rápido
+
 ### Actualizar Mazo
 - [ ] Cambiar mazo de 30 a 50 cartas (Castillo)
 - [ ] Añadir más cartas de tipo "Oro"

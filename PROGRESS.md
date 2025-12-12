@@ -28,6 +28,7 @@
 **Rama Git:** `fase-1` (activa)
 
 **Tareas:**
+- [ ] Crear repositorio de cartas (CardRepository)
 - [ ] Implementar lógica básica en Node.js
 - [ ] Bucle de juego por turnos
 - [ ] Sistema de comandos básico (`jugar`, `atacar`, `pasar`)
