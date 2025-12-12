@@ -1,0 +1,23 @@
+{
+  "name": "myl-clone",
+  "version": "1.0.0",
+  "description": "Clon web del juego de cartas Mitos y Leyendas",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node server/server.js"
+  },
+  "keywords": [
+    "tcg",
+    "card-game",
+    "mitos-y-leyendas"
+  ],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1"
+  },
+  "devDependencies": {}
+}
+

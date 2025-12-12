@@ -1,0 +1,303 @@
+[
+    {
+        "id": "carta_001",
+        "nombre": "Guerrero Valiente",
+        "tipo": "Aliado",
+        "coste": 2,
+        "ataque": 3,
+        "defensa": 2,
+        "textoHabilidad": "Sin habilidades especiales",
+        "imagen": "guerrero_valiente.jpg"
+    },
+    {
+        "id": "carta_002",
+        "nombre": "Mago Arcano",
+        "tipo": "Aliado",
+        "coste": 3,
+        "ataque": 2,
+        "defensa": 3,
+        "textoHabilidad": "Al entrar al campo, roba 1 carta",
+        "imagen": "mago_arcano.jpg"
+    },
+    {
+        "id": "carta_003",
+        "nombre": "Dragón Ancestral",
+        "tipo": "Aliado",
+        "coste": 7,
+        "ataque": 8,
+        "defensa": 8,
+        "textoHabilidad": "Vuelo. Al atacar, inflige 2 de daño adicional",
+        "imagen": "dragon_ancestral.jpg"
+    },
+    {
+        "id": "carta_004",
+        "nombre": "Bola de Fuego",
+        "tipo": "Hechizo",
+        "coste": 3,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Inflige 4 de daño a un objetivo",
+        "imagen": "bola_fuego.jpg"
+    },
+    {
+        "id": "carta_005",
+        "nombre": "Curación Menor",
+        "tipo": "Hechizo",
+        "coste": 1,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Restaura 3 puntos de vida",
+        "imagen": "curacion_menor.jpg"
+    },
+    {
+        "id": "carta_006",
+        "nombre": "Espadachín Élite",
+        "tipo": "Aliado",
+        "coste": 4,
+        "ataque": 5,
+        "defensa": 4,
+        "textoHabilidad": "Velocidad. Puede atacar el turno que entra",
+        "imagen": "espadachin_elite.jpg"
+    },
+    {
+        "id": "carta_007",
+        "nombre": "Golem de Piedra",
+        "tipo": "Aliado",
+        "coste": 5,
+        "ataque": 3,
+        "defensa": 7,
+        "textoHabilidad": "Defensor. No puede atacar",
+        "imagen": "golem_piedra.jpg"
+    },
+    {
+        "id": "carta_008",
+        "nombre": "Robo de Maná",
+        "tipo": "Hechizo",
+        "coste": 2,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Roba 2 cartas y gana 1 maná este turno",
+        "imagen": "robo_mana.jpg"
+    },
+    {
+        "id": "carta_009",
+        "nombre": "Arquero Forestal",
+        "tipo": "Aliado",
+        "coste": 2,
+        "ataque": 2,
+        "defensa": 1,
+        "textoHabilidad": "Alcance. Puede atacar a cualquier objetivo",
+        "imagen": "arquero_forestal.jpg"
+    },
+    {
+        "id": "carta_010",
+        "nombre": "Bestia Salvaje",
+        "tipo": "Aliado",
+        "coste": 3,
+        "ataque": 4,
+        "defensa": 2,
+        "textoHabilidad": "Sin habilidades especiales",
+        "imagen": "bestia_salvaje.jpg"
+    },
+    {
+        "id": "carta_011",
+        "nombre": "Escudo Mágico",
+        "tipo": "Artefacto",
+        "coste": 2,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Reduce el daño recibido en 1",
+        "imagen": "escudo_magico.jpg"
+    },
+    {
+        "id": "carta_012",
+        "nombre": "Caballero Noble",
+        "tipo": "Aliado",
+        "coste": 4,
+        "ataque": 4,
+        "defensa": 4,
+        "textoHabilidad": "Protección. Inmune a hechizos",
+        "imagen": "caballero_noble.jpg"
+    },
+    {
+        "id": "carta_013",
+        "nombre": "Rayo",
+        "tipo": "Hechizo",
+        "coste": 1,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Inflige 2 de daño",
+        "imagen": "rayo.jpg"
+    },
+    {
+        "id": "carta_014",
+        "nombre": "Fénix Renacido",
+        "tipo": "Aliado",
+        "coste": 6,
+        "ataque": 5,
+        "defensa": 5,
+        "textoHabilidad": "Al morir, vuelve al campo con 1 de vida",
+        "imagen": "fenix_renacido.jpg"
+    },
+    {
+        "id": "carta_015",
+        "nombre": "Lobo Alfa",
+        "tipo": "Aliado",
+        "coste": 3,
+        "ataque": 3,
+        "defensa": 3,
+        "textoHabilidad": "Otros aliados tuyos tienen +1 de ataque",
+        "imagen": "lobo_alfa.jpg"
+    },
+    {
+        "id": "carta_016",
+        "nombre": "Curación Mayor",
+        "tipo": "Hechizo",
+        "coste": 4,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Restaura 8 puntos de vida",
+        "imagen": "curacion_mayor.jpg"
+    },
+    {
+        "id": "carta_017",
+        "nombre": "Orco Berserker",
+        "tipo": "Aliado",
+        "coste": 2,
+        "ataque": 3,
+        "defensa": 1,
+        "textoHabilidad": "Furia. +2 de ataque cuando tiene daño",
+        "imagen": "orco_berserker.jpg"
+    },
+    {
+        "id": "carta_018",
+        "nombre": "Meteorito",
+        "tipo": "Hechizo",
+        "coste": 6,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Inflige 6 de daño a todos los enemigos",
+        "imagen": "meteorito.jpg"
+    },
+    {
+        "id": "carta_019",
+        "nombre": "Guardia Real",
+        "tipo": "Aliado",
+        "coste": 3,
+        "ataque": 2,
+        "defensa": 5,
+        "textoHabilidad": "Defensor. Protege a otros aliados",
+        "imagen": "guardia_real.jpg"
+    },
+    {
+        "id": "carta_020",
+        "nombre": "Espíritu del Viento",
+        "tipo": "Aliado",
+        "coste": 4,
+        "ataque": 3,
+        "defensa": 3,
+        "textoHabilidad": "Vuelo. No puede ser bloqueado",
+        "imagen": "espiritu_viento.jpg"
+    },
+    {
+        "id": "carta_021",
+        "nombre": "Robar Cartas",
+        "tipo": "Hechizo",
+        "coste": 2,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Roba 3 cartas",
+        "imagen": "robar_cartas.jpg"
+    },
+    {
+        "id": "carta_022",
+        "nombre": "Troll Regenerador",
+        "tipo": "Aliado",
+        "coste": 5,
+        "ataque": 4,
+        "defensa": 6,
+        "textoHabilidad": "Al final del turno, regenera 2 de vida",
+        "imagen": "troll_regenerador.jpg"
+    },
+    {
+        "id": "carta_023",
+        "nombre": "Grifo Volador",
+        "tipo": "Aliado",
+        "coste": 4,
+        "ataque": 4,
+        "defensa": 3,
+        "textoHabilidad": "Vuelo. Velocidad",
+        "imagen": "grifo_volador.jpg"
+    },
+    {
+        "id": "carta_024",
+        "nombre": "Armadura de Hierro",
+        "tipo": "Artefacto",
+        "coste": 3,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Tu héroe tiene +2 de defensa",
+        "imagen": "armadura_hierro.jpg"
+    },
+    {
+        "id": "carta_025",
+        "nombre": "Hechicero Oscuro",
+        "tipo": "Aliado",
+        "coste": 5,
+        "ataque": 3,
+        "defensa": 4,
+        "textoHabilidad": "Al atacar, el oponente descarta 1 carta",
+        "imagen": "hechicero_oscuro.jpg"
+    },
+    {
+        "id": "carta_026",
+        "nombre": "Llamada de la Naturaleza",
+        "tipo": "Hechizo",
+        "coste": 3,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Invoca 2 aliados básicos (1/1)",
+        "imagen": "llamada_naturaleza.jpg"
+    },
+    {
+        "id": "carta_027",
+        "nombre": "Gigante de Hielo",
+        "tipo": "Aliado",
+        "coste": 6,
+        "ataque": 5,
+        "defensa": 7,
+        "textoHabilidad": "Congela a los enemigos que ataca",
+        "imagen": "gigante_hielo.jpg"
+    },
+    {
+        "id": "carta_028",
+        "nombre": "Espada Legendaria",
+        "tipo": "Artefacto",
+        "coste": 4,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Tus aliados tienen +2 de ataque",
+        "imagen": "espada_legendaria.jpg"
+    },
+    {
+        "id": "carta_029",
+        "nombre": "Demonio Menor",
+        "tipo": "Aliado",
+        "coste": 1,
+        "ataque": 2,
+        "defensa": 1,
+        "textoHabilidad": "Al morir, inflige 1 de daño al oponente",
+        "imagen": "demonio_menor.jpg"
+    },
+    {
+        "id": "carta_030",
+        "nombre": "Resurrección",
+        "tipo": "Hechizo",
+        "coste": 5,
+        "ataque": 0,
+        "defensa": 0,
+        "textoHabilidad": "Devuelve un aliado del cementerio al campo",
+        "imagen": "resurreccion.jpg"
+    }
+]
+
