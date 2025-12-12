@@ -57,7 +57,7 @@ Cada jugador tiene:
 2. **robo**: Robar 1 carta del mazo (si está vacío, pierdes)
 3. **preparacion**: Jugar cartas (Oros, Aliados, Tótems, Armas, Talismanes)
 4. **batalla**: Aliados atacan o defienden
-5. **final**: Efectos de final (el descarte ya se hizo en la Fase de Robo si había más de 8 cartas)
+5. **final**: Efectos de final (el descarte se hace al final de la Fase de Robo, no aquí)
 
 ## ⚔️ Combate
 
