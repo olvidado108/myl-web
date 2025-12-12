@@ -14,6 +14,21 @@ El objetivo es **reducir el mazo del oponente a cero cartas**, lo que simboliza 
 - Se permite hasta **3 copias de cada carta**, excepto las cartas únicas, de las cuales solo se puede incluir **1 copia**.
 - El mazo debe estar barajado antes de comenzar la partida.
 
+### ⚠️ Reglas Obligatorias de Construcción
+
+1. **Oro Inicial Obligatorio:**
+   - **OBLIGATORIO:** El mazo debe incluir **exactamente 1 carta de "Oro Inicial"**.
+   - Este Oro Inicial es una carta especial que debe estar en el mazo.
+   - Al inicio de la partida, **el Oro Inicial ya se encuentra en la Reserva de Oro** (no se roba, ya está desplegado).
+   - Esto garantiza que el jugador tenga recursos desde el primer turno.
+
+2. **Número Mínimo de Aliados:**
+   - El mazo debe contener un **número mínimo de Aliados** (cantidad específica según formato).
+   - Esta regla asegura que el jugador tenga suficientes unidades para combatir.
+
+3. **Restricciones por Formato:**
+   - Dependiendo del formato elegido, pueden aplicarse restricciones adicionales sobre razas, ediciones permitidas, etc.
+
 ## 🃏 Tipos de Cartas
 
 ### 1. **Aliados**
@@ -42,6 +57,8 @@ El objetivo es **reducir el mazo del oponente a cero cartas**, lo que simboliza 
 - Equipamientos que mejoran las habilidades de los Aliados.
 - Se colocan en la **Línea de Apoyo**.
 - Se equipan a Aliados para mejorar sus estadísticas.
+- **Regla de Equipamiento:** Un Aliado solo puede tener **1 Arma equipada** a la vez.
+- **Excepción:** Si un Aliado tiene una habilidad especial que indique lo contrario (ej: "Puede equipar múltiples armas"), entonces puede equipar más de una.
 
 ## 📍 Áreas de Juego
 
@@ -81,6 +98,7 @@ Cada turno se divide en las siguientes fases:
 ### 1. **Fase de Inicio**
 - Se enderezan las cartas giradas (si las hay).
 - Se resuelven efectos que ocurren al inicio del turno.
+- **IMPORTANTE:** Al inicio de la partida (primer turno del primer jugador), el **Oro Inicial ya está en la Reserva de Oro** (no se roba, ya está desplegado).
 - Se prepara el turno.
 
 ### 2. **Fase de Robo**
@@ -135,6 +153,13 @@ Cada turno se divide en las siguientes fases:
 - El coste de las cartas se paga con recursos de los Oros.
 - Los recursos se acumulan y se pueden usar en el mismo turno.
 
+### 🟡 Oro Inicial
+
+- **Obligatorio:** Cada mazo debe incluir **1 Oro Inicial**.
+- **Inicio de Partida:** El Oro Inicial **ya está desplegado en la Reserva de Oro** al comenzar la partida.
+- **No se roba:** El Oro Inicial no forma parte de las 50 cartas que se roban del mazo, ya está en juego desde el inicio.
+- **Primer Recurso:** Esto garantiza que el jugador tenga al menos 1 recurso disponible desde su primer turno.
+
 ## 🎴 Habilidades de las Cartas
 
 Muchas cartas poseen **habilidades especiales** que pueden activarse bajo ciertas condiciones:
@@ -159,6 +184,47 @@ Muchas cartas poseen **habilidades especiales** que pueden activarse bajo cierta
 - Esto puede ocurrir por:
   - Robar cartas normalmente.
   - Ataques directos al Castillo que descartan cartas del mazo.
+
+## 🎭 Formatos de Juego
+
+Existen diferentes formatos que determinan qué cartas pueden usarse y cómo construir el mazo. Los formatos principales son:
+
+### 1. **Formato Racial Edición**
+- **Regla Principal:** Debes elegir **una raza** disponible en una edición del formato elegido.
+- **Restricción de Cartas:** Solo puedes usar:
+  - **Aliados** de la raza elegida.
+  - **Cartas de soporte** (Talismanes, Oros, Tótems, Armas) **únicamente de la edición original** de esa raza o de sus productos derivados.
+- **Ejemplo:** Si eliges jugar formato "Primer Bloque Extendido" y seleccionas la raza **Olímpico**, entonces:
+  - Solo puedes usar Aliados de raza Olímpico.
+  - Solo puedes usar cartas de soporte de la edición **Helénica** (edición original de Olímpico) o de sus productos derivados.
+
+### 2. **Formato Racial o Racial Soporte Libre**
+- **Regla Principal:** Debes elegir **una raza** disponible en una edición del formato elegido.
+- **Restricción de Cartas:** Puedes usar:
+  - **Aliados** de la raza elegida.
+  - **Cartas de soporte** (Talismanes, Oros, Tótems, Armas) de **cualquier edición** que esté permitida en el formato.
+- **Diferencia con Racial Edición:** En este formato, las cartas de soporte pueden venir de cualquier edición del formato, no solo de la edición original de la raza.
+
+### 📋 Razas Comunes en Mitos y Leyendas
+
+Algunas razas disponibles (pueden variar según formato):
+- **Olímpico** (edición Helénica)
+- **Nórdico** (edición Nórdica)
+- **Egipcio** (edición Egipcia)
+- **Celta** (edición Celta)
+- **Oriental** (edición Oriental)
+- **Maya** (edición Maya)
+- Y muchas más según las ediciones disponibles.
+
+### ⚙️ Validación de Mazos por Formato
+
+Al construir un mazo, el sistema debe validar:
+1. ✅ Tiene exactamente 50 cartas.
+2. ✅ Incluye 1 Oro Inicial obligatorio.
+3. ✅ Cumple con el número mínimo de Aliados requerido.
+4. ✅ Respeta las restricciones de raza del formato elegido.
+5. ✅ Las cartas de soporte cumplen con las restricciones del formato (Racial Edición vs Racial Soporte Libre).
+6. ✅ No excede el límite de copias (3 copias normales, 1 copia única).
 
 ## 🔗 Referencias
 

@@ -47,6 +47,7 @@ http://localhost:3000
 ## 📚 Documentación del Proyecto
 
 - **[GAME_RULES.md](./GAME_RULES.md)** - ⭐ **Reglas oficiales del juego** (LEER PRIMERO)
+- **[DECK_CONSTRUCTION_RULES.md](./DECK_CONSTRUCTION_RULES.md)** - ⭐ **Reglas de construcción de mazos** (OBLIGATORIO)
 - **[PROGRESS.md](./PROGRESS.md)** - Estado actual, fases completadas y pendientes
 - **[ROADMAP.md](./ROADMAP.md)** - Plan detallado de desarrollo por fases
 - **[IMPLEMENTATION_NOTES.md](./IMPLEMENTATION_NOTES.md)** - Notas sobre cómo implementar las reglas
