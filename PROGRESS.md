@@ -3,7 +3,8 @@
 **Última actualización:** 2025-01-27
 
 ## 🎯 Fase Actual
-**Fase 0: Preparación y Arquitectura** ✅ **COMPLETADA**
+**Fase 1: Prototipo Jugable en Consola** 🚧 **EN PROGRESO**  
+**Rama Git:** `fase-1` (activa)
 
 ## ✅ Fases Completadas
 
@@ -22,24 +23,24 @@
 
 ## 🚧 Fases en Progreso
 
-*Ninguna actualmente*
-
-## 📋 Fases Pendientes
-
 ### Fase 1: Prototipo Jugable en Consola
-**Estado:** Pendiente  
-**Rama Git:** `fase-1` (a crear)
+**Estado:** En Progreso  
+**Rama Git:** `fase-1` (activa)
 
 **Tareas:**
 - [ ] Implementar lógica básica en Node.js
-- [ ] Función para barajar mazo (Fisher-Yates) ✅ Ya implementada
-- [ ] Función para repartir cartas iniciales ✅ Ya implementada
 - [ ] Bucle de juego por turnos
 - [ ] Sistema de comandos básico (`jugar`, `atacar`, `pasar`)
 - [ ] Condiciones de victoria
 - [ ] IA básica para oponente automático
 
-**Hito:** Poder jugar una partida completa (1 jugador vs IA) desde la terminal
+**Nota:** Las funciones de barajar y repartir ya están implementadas en `server/utils/gameUtils.js`
+
+## 📋 Fases Pendientes
+
+### Fase 2: Interfaz Gráfica Web con Phaser
+**Estado:** Pendiente  
+**Rama Git:** `fase-2` (a crear cuando termine Fase 1)
 
 ### Fase 2: Interfaz Gráfica Web con Phaser
 **Estado:** Pendiente  
