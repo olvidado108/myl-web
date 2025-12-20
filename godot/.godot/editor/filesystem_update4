@@ -1,0 +1,7 @@
+res://scripts/ApiClient.gd
+res://scripts/Lobby.gd
+res://scripts/CardLoader.gd
+res://scripts/GameStateView.gd
+res://scripts/Game.gd
+res://scripts/WsClient.gd
+res://scenes/Card.tscn

@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Revisión de Tags Sugeridos</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 24px; }
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f5f5f5; }
+    .controls { margin-bottom: 12px; display: flex; gap: 8px; align-items: center; }
+    .tags { display: flex; flex-wrap: wrap; gap: 6px; }
+    .tag { background: #eef; border: 1px solid #ccd; border-radius: 4px; padding: 2px 6px; font-size: 12px; }
+  </style>
+</head>
+<body>
+  <h1>Revisión de Tags Sugeridos</h1>
+  <div class="controls">
+    <label>Búsqueda: <input id="search" placeholder="nombre o id" /></label>
+    <label>Límite: <input id="limit" type="number" value="50" min="1" max="500" /></label>
+    <button id="load">Cargar</button>
+  </div>
+  <div id="status">Cargando...</div>
+  <div class="controls" style="margin-bottom:16px;">
+    <button id="newTag">Crear nuevo tag</button>
+  </div>
+  <table id="table">
+    <thead>
+      <tr><th>ID</th><th>Nombre</th><th>Tipo</th><th>Texto Habilidad</th><th>Tags sugeridos</th><th>Confirmar</th><th>Agregar tag</th><th>Verificada</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const statusEl = document.getElementById('status');
+    const tbody = document.querySelector('#table tbody');
+    const searchEl = document.getElementById('search');
+    const limitEl = document.getElementById('limit');
+    const loadBtn = document.getElementById('load');
+
+    let catalog = [];
+
+    async function loadTagsCatalog() {
+      const res = await fetch('/api/tags');
+      const json = await res.json();
+      if (!json.success) throw new Error(json.error || 'Error tags');
+      catalog = json.data;
+    }
+
+    function createSelect() {
+      const sel = document.createElement('select');
+      const empty = document.createElement('option');
+      empty.value = '';
+      empty.textContent = 'Selecciona tag';
+      sel.appendChild(empty);
+      catalog.forEach(t => {
+        const opt = document.createElement('option');
+        opt.value = t.slug;
+        opt.textContent = `${t.slug} (${t.nombre})`;
+        sel.appendChild(opt);
+      });
+      return sel;
+    }
+
+    async function load() {
+      const params = new URLSearchParams();
+      const search = searchEl.value.trim();
+      if (search) params.set('search', search);
+      const limit = parseInt(limitEl.value) || 50;
+      params.set('limite', limit);
+      statusEl.textContent = 'Cargando...';
+      tbody.innerHTML = '';
+      try {
+        const res = await fetch('/api/tag-suggestions?' + params.toString());
+        const json = await res.json();
+        if (!json.success) throw new Error(json.error || 'Error desconocido');
+        statusEl.textContent = `Mostrando ${json.count} resultados`;
+        tbody.innerHTML = '';
+        json.data.forEach(row => {
+          const tr = document.createElement('tr');
+          const sel = createSelect();
+          const addBtn = document.createElement('button');
+          addBtn.textContent = 'Agregar';
+          addBtn.onclick = async () => {
+            const slug = sel.value;
+            if (!slug) return;
+            addBtn.disabled = true;
+            try {
+              const res2 = await fetch(`/api/cards/${row.id}/tags`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tag: slug, suggested: 0 })
+              });
+              const js2 = await res2.json();
+              if (!js2.success) throw new Error(js2.error || 'Error al agregar tag');
+              await load();
+            } catch (err) {
+              alert(err.message);
+            } finally {
+              addBtn.disabled = false;
+            }
+          };
+          const confirmBtn = document.createElement('button');
+          confirmBtn.textContent = 'Confirmar';
+          confirmBtn.onclick = async () => {
+            confirmBtn.disabled = true;
+            try {
+              const res2 = await fetch(`/api/cards/${row.id}/tags/confirm`, { method: 'POST' });
+              const js2 = await res2.json();
+              if (!js2.success) throw new Error(js2.error || 'Error al confirmar');
+              await load();
+            } catch (err) {
+              alert(err.message);
+            } finally {
+              confirmBtn.disabled = false;
+            }
+          };
+          tr.innerHTML = `
+            <td>${row.id}</td>
+            <td>${row.nombre}</td>
+            <td>${row.tipo || ''}</td>
+            <td style="max-width:280px;">${(row.textoHabilidad || '').replace(/\\n/g,'<br/>')}</td>
+            <td class="tags">${(row.tags || []).map(t => `<span class="tag">${t}</span>`).join('')}</td>
+            <td></td>
+            <td></td>
+            <td>${row.isVerified ? '✅' : '⏳'}</td>
+          `;
+          tr.children[5].appendChild(confirmBtn);
+          tr.children[6].appendChild(sel);
+          tr.children[6].appendChild(document.createTextNode(' '));
+          tr.children[6].appendChild(addBtn);
+          const verifyBtn = document.createElement('button');
+          verifyBtn.textContent = row.isVerified ? 'Quitar verificada' : 'Marcar verificada';
+          verifyBtn.onclick = async () => {
+            verifyBtn.disabled = true;
+            try {
+              const url = row.isVerified ? `/api/cards/${row.id}/unverify` : `/api/cards/${row.id}/verify`;
+              const res3 = await fetch(url, { method: 'POST' });
+              const js3 = await res3.json();
+              if (!js3.success) throw new Error(js3.error || 'Error al marcar verificada');
+              await load();
+            } catch (err) {
+              alert(err.message);
+            } finally {
+              verifyBtn.disabled = false;
+            }
+          };
+          tr.children[7].innerHTML = '';
+          tr.children[7].appendChild(verifyBtn);
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        statusEl.textContent = 'Error: ' + err.message;
+      }
+    }
+
+    loadBtn.addEventListener('click', () => load());
+
+    document.getElementById('newTag').addEventListener('click', async () => {
+      const slug = prompt('Slug (snake_case, minúsculas):');
+      if (!slug) return;
+      const nombre = prompt('Nombre visible:', slug);
+      if (!nombre) return;
+      const categoria = prompt('Categoría (opcional):', '');
+      const descripcion = prompt('Descripción (opcional):', '');
+      try {
+        const res = await fetch('/api/tags', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ slug, nombre, categoria: categoria || null, descripcion: descripcion || null })
+        });
+        const js = await res.json();
+        if (!js.success) throw new Error(js.error || 'Error creando tag');
+        await loadTagsCatalog();
+        await load();
+      } catch (err) {
+        alert(err.message);
+      }
+    });
+
+    (async () => {
+      await loadTagsCatalog();
+      await load();
+    })();
+  </script>
+</body>
+</html>
+
+

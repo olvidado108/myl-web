@@ -1,0 +1,1146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Constructor de Mazos - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <style>
+        body {
+            display: block !important;
+            padding: 0 !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .builder-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 20px;
+        }
+
+        .builder-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 20px 20px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .builder-content {
+            background: white;
+            padding: 30px;
+            border-radius: 0 0 20px 20px;
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 20px;
+        }
+
+        .cards-section {
+            min-height: 500px;
+        }
+
+        .deck-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            position: sticky;
+            top: 20px;
+            max-height: calc(100vh - 100px);
+            overflow-y: auto;
+        }
+
+        .search-filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-filters input,
+        .search-filters select {
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .search-filters input {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 15px;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .card-item {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .card-item:hover {
+            border-color: #667eea;
+            transform: translateY(-2px);
+        }
+
+        .card-item img {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 10px;
+        }
+
+        .deck-stats {
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .deck-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .deck-card-item {
+            background: white;
+            padding: 8px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .deck-card-item .card-thumbnail {
+            width: 35px;
+            height: 49px;
+            object-fit: cover;
+            border-radius: 4px;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            transition: transform 0.2s;
+            flex-shrink: 0;
+        }
+
+        .deck-card-item .card-thumbnail:hover {
+            transform: scale(1.15);
+            border-color: #667eea;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .deck-card-item .card-name {
+            flex: 1;
+            font-weight: 500;
+            font-size: 0.9em;
+        }
+
+        .deck-card-item .card-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .deck-card-item .card-count {
+            background: #667eea;
+            color: white;
+            padding: 4px 10px;
+            border-radius: 4px;
+            min-width: 30px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 0.9em;
+        }
+
+        .btn-card-control {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border-radius: 4px;
+            font-size: 16px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-card-control:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .btn-card-control:not(:disabled):hover {
+            transform: scale(1.1);
+        }
+
+        .validation-errors {
+            background: #fee;
+            color: #c33;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .validation-errors.show {
+            display: block;
+        }
+
+        .validation-errors ul {
+            margin: 10px 0 0 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .builder-content {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Modal para imagen grande */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 10000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 15px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+            animation: slideUp 0.3s;
+        }
+
+        .modal-image {
+            max-width: 90%;
+            max-height: 95vh;
+            width: auto;
+            background: transparent;
+            box-shadow: none;
+        }
+
+        .modal-image-body {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.9);
+            border-radius: 0 0 15px 15px;
+        }
+
+        .modal-image-body img {
+            width: 600px;
+            height: 800px;
+            max-width: 90vw;
+            max-height: 85vh;
+            object-fit: contain;
+            border-radius: 8px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-image .modal-header {
+            background: rgba(0, 0, 0, 0.8);
+            border-radius: 15px 15px 0 0;
+            color: white;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 25px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5em;
+            color: white;
+        }
+
+        .close {
+            font-size: 2em;
+            font-weight: bold;
+            cursor: pointer;
+            color: white;
+            transition: color 0.3s;
+            line-height: 1;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close:hover {
+            color: #ff6b6b;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="navbar-container" id="navbar-container">
+            <!-- Se llenará dinámicamente -->
+        </div>
+    </nav>
+
+    <div class="builder-container">
+        <div class="builder-header">
+            <div>
+                <h1>🃏 Constructor de Mazos</h1>
+                <p id="deckName">Nuevo Mazo</p>
+            </div>
+            <div>
+                <button class="btn btn-secondary" onclick="window.location.href='decks.html'">Volver</button>
+                <button class="btn btn-primary" onclick="saveDeck()">Guardar Mazo</button>
+            </div>
+        </div>
+
+        <div class="builder-content">
+            <div class="cards-section">
+                <div id="errorMessage" class="message error"></div>
+                <div id="successMessage" class="message success"></div>
+
+                <div id="validationErrors" class="validation-errors">
+                    <strong>Errores de validación:</strong>
+                    <ul id="validationErrorsList"></ul>
+                </div>
+
+                <div class="search-filters">
+                    <input type="text" id="cardSearch" placeholder="Buscar carta..." oninput="filterCards()">
+                    <select id="filterTipo" onchange="filterCards()">
+                        <option value="">Todos los tipos</option>
+                        <option value="Aliado">Aliado</option>
+                        <option value="Talisman">Talisman</option>
+                        <option value="Oro">Oro</option>
+                        <option value="Totem">Totem</option>
+                        <option value="Arma">Arma</option>
+                    </select>
+                    <select id="filterRaza" onchange="filterCards()">
+                        <option value="">Todas las razas</option>
+                    </select>
+                </div>
+
+                <div class="cards-grid" id="cardsGrid">
+                    <p>Cargando cartas...</p>
+                </div>
+            </div>
+
+            <div class="deck-section">
+                <h3>Información del Mazo</h3>
+                <div class="form-group">
+                    <label>Nombre del Mazo *</label>
+                    <input type="text" id="deckNameInput" placeholder="Nombre del mazo" required>
+                </div>
+                <div class="form-group">
+                    <label>Descripción</label>
+                    <textarea id="deckDescription" rows="3" placeholder="Descripción del mazo"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Formato</label>
+                    <select id="deckFormat" onchange="onFormatChange()">
+                        <option value="Racial Edición">Racial Edición</option>
+                        <option value="Racial Soporte Libre">Racial Soporte Libre</option>
+                        <option value="Libre">Libre</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Edición *</label>
+                    <select id="deckEdicion" onchange="onDeckConfigChange()" required>
+                        <option value="">Seleccionar edición</option>
+                        <option value="Espada Sagrada">Espada Sagrada</option>
+                        <option value="Helénica">Helénica</option>
+                        <option value="Hijos De Daana">Hijos De Daana</option>
+                        <option value="Dominios De Ra">Dominios De Ra</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Raza</label>
+                    <select id="deckRaza" onchange="onRazaChange()">
+                        <option value="">Seleccionar raza</option>
+                    </select>
+                </div>
+                <div class="form-group" id="oroInicialGroup" style="display: none;">
+                    <label>Oro Inicial *</label>
+                    <select id="oroInicial" onchange="onOroInicialChange()" required>
+                        <option value="">Seleccionar oro inicial</option>
+                    </select>
+                    <small style="color: #666; font-size: 0.85em;">El oro inicial se agregará automáticamente al mazo</small>
+                </div>
+
+                <div class="deck-stats">
+                    <h4>Estadísticas del Mazo</h4>
+                    <div class="stat-item">
+                        <span>Total de cartas:</span>
+                        <strong id="totalCards">0</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Aliados:</span>
+                        <strong id="aliadosCount">0</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Oros:</span>
+                        <strong id="orosCount">0</strong>
+                    </div>
+                    <div class="stat-item">
+                        <span>Otros:</span>
+                        <strong id="otrosCount">0</strong>
+                    </div>
+                </div>
+
+                <h4>Cartas en el Mazo</h4>
+                <div class="deck-list" id="deckList">
+                    <p style="text-align: center; color: #666;">El mazo está vacío</p>
+                </div>
+
+    <!-- Modal para imagen grande de carta -->
+    <div id="imageModal" class="modal">
+        <div class="modal-content modal-image">
+            <div class="modal-header">
+                <h2 id="imageModalTitle">Imagen de Carta</h2>
+                <span class="close" id="closeImageModal">&times;</span>
+            </div>
+            <div class="modal-image-body">
+                <img id="modalLargeImage" src="" alt="Imagen de carta" />
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script>
+        let allCards = [];
+        let filteredCards = [];
+        let deckCards = [];
+        let currentDeckId = null;
+        let currentDeck = null;
+        let oroInicialId = null;
+
+        // Cargar mazo existente si hay ID en la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const deckId = urlParams.get('id');
+
+
+        async function init() {
+            try {
+                await checkAuth(true);
+                
+                // Cargar cartas
+                await loadCards();
+                
+                // Cargar razas para filtros
+                loadRazas();
+                loadEdiciones();
+                
+                // Si hay ID, cargar mazo existente
+                if (deckId) {
+                    await loadDeck(deckId);
+                } else {
+                    updateDeckStats();
+                    // Aplicar filtros iniciales
+                    onDeckConfigChange();
+                }
+            } catch (error) {
+                showError('Error al inicializar: ' + error.message);
+            }
+        }
+
+        async function loadCards() {
+            try {
+                const response = await api.getCards();
+                if (response.success) {
+                    allCards = response.data;
+                    filteredCards = allCards;
+                    displayCards();
+                }
+            } catch (error) {
+                showError('Error al cargar cartas: ' + error.message);
+            }
+        }
+
+        function loadRazas(edicion = null, preservarValor = null) {
+            // Si hay edición, filtrar razas por edición
+            let cartasFiltradas = allCards;
+            if (edicion) {
+                cartasFiltradas = allCards.filter(c => c.edicion === edicion);
+            }
+            
+            const razas = [...new Set(cartasFiltradas.map(c => c.raza).filter(Boolean))].sort();
+            const filterRaza = document.getElementById('filterRaza');
+            const deckRaza = document.getElementById('deckRaza');
+            
+            // Guardar valor actual antes de limpiar
+            const valorActual = preservarValor !== null ? preservarValor : deckRaza.value;
+            
+            // Limpiar opciones existentes (excepto la primera)
+            while (filterRaza.children.length > 1) filterRaza.removeChild(filterRaza.lastChild);
+            while (deckRaza.children.length > 1) deckRaza.removeChild(deckRaza.lastChild);
+            
+            razas.forEach(raza => {
+                const option1 = document.createElement('option');
+                option1.value = raza;
+                option1.textContent = raza;
+                filterRaza.appendChild(option1);
+                
+                const option2 = document.createElement('option');
+                option2.value = raza;
+                option2.textContent = raza;
+                deckRaza.appendChild(option2);
+            });
+            
+            // Restaurar valor si existe y es válido
+            if (valorActual && razas.includes(valorActual)) {
+                // Usar requestAnimationFrame para asegurar que el DOM esté actualizado
+                requestAnimationFrame(() => {
+                    deckRaza.value = valorActual;
+                    // Forzar el evento change si es necesario
+                    deckRaza.dispatchEvent(new Event('change', { bubbles: true }));
+                });
+            } else if (valorActual && !razas.includes(valorActual)) {
+                // Si el valor no es válido, limpiar
+                requestAnimationFrame(() => {
+                    deckRaza.value = '';
+                });
+            }
+        }
+
+        function loadEdiciones() {
+            const ediciones = [...new Set(allCards.map(c => c.edicion).filter(Boolean))].sort();
+            // Ya están hardcodeadas en el HTML, pero podríamos cargarlas dinámicamente si fuera necesario
+        }
+
+        function onFormatChange() {
+            const formato = document.getElementById('deckFormat').value;
+            const edicionGroup = document.getElementById('oroInicialGroup');
+            
+            if (formato === 'Racial Edición' || formato === 'Racial Soporte Libre') {
+                edicionGroup.style.display = 'block';
+                document.getElementById('oroInicial').required = true;
+            } else {
+                edicionGroup.style.display = 'none';
+                document.getElementById('oroInicial').required = false;
+                // Remover oro inicial del mazo si existe
+                if (oroInicialId) {
+                    deckCards = deckCards.filter(id => id !== oroInicialId);
+                    oroInicialId = null;
+                    updateDeckStats();
+                    updateDeckList();
+                }
+            }
+            
+            onDeckConfigChange();
+        }
+
+        function onDeckConfigChange() {
+            const formato = document.getElementById('deckFormat').value;
+            const edicion = document.getElementById('deckEdicion').value;
+            const razaSeleccionada = document.getElementById('deckRaza').value; // Guardar valor antes de limpiar
+            
+            // Actualizar razas disponibles según la edición
+            if (edicion) {
+                // Cargar razas preservando el valor si es válido
+                loadRazas(edicion, razaSeleccionada);
+            } else {
+                // Cargar todas las razas preservando el valor si es válido
+                loadRazas(null, razaSeleccionada);
+            }
+            
+            // Actualizar filtros de cartas disponibles
+            applyDeckFilters();
+            
+            // Si hay formato y edición, cargar oros iniciales
+            if ((formato === 'Racial Edición' || formato === 'Racial Soporte Libre') && edicion) {
+                loadOrosIniciales(edicion);
+            }
+        }
+
+        function loadOrosIniciales(edicion) {
+            const orosIniciales = allCards.filter(card => 
+                card.tipo === 'Oro' && 
+                card.edicion === edicion &&
+                (card.esOroInicial === 1 || card.esOroInicial === true || card.nombre?.toLowerCase().includes('inicial'))
+            );
+            
+            const select = document.getElementById('oroInicial');
+            // Limpiar opciones existentes (excepto la primera)
+            while (select.children.length > 1) select.removeChild(select.lastChild);
+            
+            orosIniciales.forEach(oro => {
+                const option = document.createElement('option');
+                option.value = oro.id;
+                option.textContent = oro.nombre || oro.id;
+                select.appendChild(option);
+            });
+            
+            // Si hay un oro inicial seleccionado previamente y está en la lista, restaurarlo
+            if (oroInicialId && orosIniciales.find(o => o.id === oroInicialId)) {
+                select.value = oroInicialId;
+            } else if (orosIniciales.length > 0) {
+                // Si hay oros iniciales disponibles, seleccionar el primero automáticamente
+                const primerOro = orosIniciales[0];
+                select.value = primerOro.id;
+                onOroInicialChange();
+            } else {
+                // Si no hay oros iniciales, limpiar la selección
+                select.value = '';
+                if (oroInicialId) {
+                    deckCards = deckCards.filter(id => id !== oroInicialId);
+                    oroInicialId = null;
+                    updateDeckStats();
+                    updateDeckList();
+                }
+            }
+        }
+
+        function onRazaChange() {
+            // Solo actualizar filtros cuando cambia la raza, sin resetear el valor
+            applyDeckFilters();
+        }
+
+        function onOroInicialChange() {
+            const nuevoOroId = document.getElementById('oroInicial').value;
+            
+            // Remover el oro inicial anterior del mazo si existe
+            if (oroInicialId) {
+                deckCards = deckCards.filter(id => id !== oroInicialId);
+            }
+            
+            // Agregar el nuevo oro inicial al inicio del mazo
+            if (nuevoOroId) {
+                oroInicialId = nuevoOroId;
+                deckCards = deckCards.filter(id => id !== oroInicialId);
+                deckCards.unshift(oroInicialId);
+            } else {
+                oroInicialId = null;
+            }
+            
+            // Actualizar estadísticas y lista
+            updateDeckStats();
+            updateDeckList();
+            validateDeck();
+        }
+
+        function applyDeckFilters() {
+            const formato = document.getElementById('deckFormat').value;
+            const edicion = document.getElementById('deckEdicion').value;
+            const raza = document.getElementById('deckRaza').value;
+            
+            // Si no hay formato o edición seleccionada, mostrar todas las cartas
+            if (!formato || !edicion) {
+                filteredCards = allCards;
+                displayCards();
+                return;
+            }
+            
+            // Filtrar según el formato
+            if (formato === 'Racial Edición' || formato === 'Racial Soporte Libre') {
+                // Para formatos raciales:
+                // - Aliados: solo de la raza y edición seleccionadas
+                // - Oros, Totems, Armas, Talismanes: de la edición seleccionada (sin restricción de raza)
+                filteredCards = allCards.filter(card => {
+                    if (card.edicion !== edicion) return false;
+                    
+                    // Excluir oros iniciales de las cartas disponibles (se seleccionan desde el selector)
+                    if (card.tipo === 'Oro' && 
+                        (card.esOroInicial === 1 || card.esOroInicial === true || 
+                         card.nombre?.toLowerCase().includes('inicial'))) {
+                        return false; // No mostrar oros iniciales en la lista de cartas
+                    }
+                    
+                    if (card.tipo === 'Aliado') {
+                        // Aliados deben ser de la raza seleccionada
+                        return raza && card.raza === raza;
+                    } else {
+                        // Oros (no iniciales), Totems, Armas, Talismanes: solo edición
+                        return ['Oro', 'Totem', 'Arma', 'Talisman'].includes(card.tipo);
+                    }
+                });
+            } else if (formato === 'Libre') {
+                // Formato libre: todas las cartas sin restricciones (excepto oros iniciales si hay uno seleccionado)
+                filteredCards = allCards.filter(card => {
+                    // Si hay un oro inicial seleccionado, no mostrar otros oros iniciales
+                    if (oroInicialId && card.tipo === 'Oro' && 
+                        (card.esOroInicial === 1 || card.esOroInicial === true || 
+                         card.nombre?.toLowerCase().includes('inicial')) &&
+                        card.id !== oroInicialId) {
+                        return false;
+                    }
+                    return true;
+                });
+            }
+            
+            displayCards();
+        }
+
+        function filterCards() {
+            const search = document.getElementById('cardSearch').value.toLowerCase();
+            const tipo = document.getElementById('filterTipo').value;
+            
+            // Primero aplicar filtros del mazo (formato, edición, raza)
+            applyDeckFilters();
+            
+            // Luego aplicar filtros de búsqueda
+            filteredCards = filteredCards.filter(card => {
+                const matchSearch = !search || card.nombre?.toLowerCase().includes(search);
+                const matchTipo = !tipo || card.tipo === tipo;
+                return matchSearch && matchTipo;
+            });
+
+            displayCards();
+        }
+
+        function displayCards() {
+            const grid = document.getElementById('cardsGrid');
+            grid.innerHTML = filteredCards.map(card => `
+                <div class="card-item" onclick="addCardToDeck('${card.id}')">
+                    ${card.imagenUrl ? `<img src="${card.imagenUrl}" alt="${card.nombre}" onerror="this.style.display='none'">` : ''}
+                    <div style="font-size: 0.85em; font-weight: bold;">${escapeHtml(card.nombre || 'Sin nombre')}</div>
+                    <div style="font-size: 0.75em; color: #666;">${card.tipo} - ${card.raza || 'N/A'}</div>
+                </div>
+            `).join('');
+        }
+
+        function addCardToDeck(cardId) {
+            const card = allCards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            // Verificar límite de tamaño del mazo (50 cartas máximo)
+            if (deckCards.length >= 50) {
+                showError('El mazo ha alcanzado el límite máximo de 50 cartas');
+                return;
+            }
+            
+            // No permitir agregar el oro inicial seleccionado (ya está incluido automáticamente)
+            if (cardId === oroInicialId) {
+                showError('El oro inicial ya está incluido en el mazo');
+                return;
+            }
+            
+            // No permitir agregar otros oros iniciales si ya hay uno seleccionado
+            if (oroInicialId && card.tipo === 'Oro' && 
+                (card.esOroInicial === 1 || card.esOroInicial === true || 
+                 card.nombre?.toLowerCase().includes('inicial'))) {
+                showError('Ya hay un oro inicial seleccionado. No se pueden agregar más oros iniciales.');
+                return;
+            }
+            
+            // Verificar límite de copias por nombre (máximo 3, o 1 si es única)
+            const esUnica = card.rareza === 'Única' || card.rareza === 'Unica';
+            const maxCopias = esUnica ? 1 : 3;
+            
+            // Contar cartas con el mismo nombre en el mazo (excluyendo el oro inicial)
+            const cartasConMismoNombre = deckCards.filter(id => {
+                if (id === oroInicialId) return false; // Excluir oro inicial del conteo
+                const cartaEnMazo = allCards.find(c => c.id === id);
+                return cartaEnMazo && cartaEnMazo.nombre === card.nombre;
+            }).length;
+            
+            if (cartasConMismoNombre >= maxCopias) {
+                showError(`No se pueden agregar más de ${maxCopias} copia${maxCopias > 1 ? 's' : ''} de "${card.nombre}"`);
+                return;
+            }
+            
+            deckCards.push(cardId);
+            updateDeckStats();
+            updateDeckList();
+            validateDeck();
+        }
+
+        function removeCardFromDeck(cardId) {
+            // No permitir remover el oro inicial
+            if (cardId === oroInicialId) {
+                showError('No puedes remover el oro inicial del mazo');
+                return;
+            }
+            
+            // No permitir remover ningún oro inicial
+            const card = allCards.find(c => c.id === cardId);
+            if (card && card.tipo === 'Oro' && 
+                (card.esOroInicial === 1 || card.esOroInicial === true || 
+                 card.nombre?.toLowerCase().includes('inicial'))) {
+                showError('No puedes remover oros iniciales del mazo');
+                return;
+            }
+            
+            const index = deckCards.indexOf(cardId);
+            if (index > -1) {
+                deckCards.splice(index, 1);
+                updateDeckStats();
+                updateDeckList();
+                validateDeck();
+            }
+        }
+
+        function updateDeckStats() {
+            // Asegurar que el oro inicial esté en deckCards si está seleccionado
+            if (oroInicialId && !deckCards.includes(oroInicialId)) {
+                deckCards.unshift(oroInicialId);
+            }
+            
+            const total = deckCards.length;
+            const aliados = deckCards.filter(id => {
+                const card = allCards.find(c => c.id === id);
+                return card && card.tipo === 'Aliado';
+            }).length;
+            const oros = deckCards.filter(id => {
+                const card = allCards.find(c => c.id === id);
+                return card && card.tipo === 'Oro';
+            }).length;
+            const otros = total - aliados - oros;
+
+            document.getElementById('totalCards').textContent = total;
+            document.getElementById('aliadosCount').textContent = aliados;
+            document.getElementById('orosCount').textContent = oros;
+            document.getElementById('otrosCount').textContent = otros;
+        }
+
+        function updateDeckList() {
+            const list = document.getElementById('deckList');
+            const cardCounts = {};
+            
+            // Asegurar que el oro inicial esté en deckCards
+            if (oroInicialId && !deckCards.includes(oroInicialId)) {
+                deckCards.unshift(oroInicialId);
+            }
+            
+            // Contar todas las cartas
+            deckCards.forEach(cardId => {
+                cardCounts[cardId] = (cardCounts[cardId] || 0) + 1;
+            });
+
+            // Si no hay cartas, mostrar mensaje vacío
+            if (Object.keys(cardCounts).length === 0) {
+                list.innerHTML = '<p style="text-align: center; color: #666;">El mazo está vacío</p>';
+                return;
+            }
+
+            list.innerHTML = Object.entries(cardCounts).map(([cardId, count]) => {
+                const card = allCards.find(c => c.id === cardId);
+                if (!card) return '';
+                
+                const isOroInicial = cardId === oroInicialId;
+                
+                // Determinar límites de copias por nombre
+                const esUnica = card.rareza === 'Única' || card.rareza === 'Unica';
+                const maxCopias = esUnica ? 1 : 3;
+                
+                // Contar cartas con el mismo nombre en el mazo (excluyendo el oro inicial)
+                const cartasConMismoNombre = deckCards.filter(id => {
+                    if (id === oroInicialId) return false;
+                    const cartaEnMazo = allCards.find(c => c.id === id);
+                    return cartaEnMazo && cartaEnMazo.nombre === card.nombre;
+                }).length;
+                
+                // Verificar límite de tamaño del mazo (50 cartas máximo)
+                const mazoCompleto = deckCards.length >= 50;
+                const puedeAgregar = !isOroInicial && !mazoCompleto && cartasConMismoNombre < maxCopias;
+                const puedeQuitar = !isOroInicial && count > 0;
+                
+                const imagenUrl = card.imagenUrl || '';
+                
+                return `
+                    <div class="deck-card-item" style="${isOroInicial ? 'background: #e8f4f8; border: 2px solid #667eea; font-weight: bold;' : ''}">
+                        ${imagenUrl ? `
+                            <img src="${escapeHtml(imagenUrl)}" 
+                                 alt="${escapeHtml(card.nombre || 'Carta')}" 
+                                 class="card-thumbnail"
+                                 onclick="openCardImageModal('${escapeHtml(imagenUrl)}', '${escapeHtml(card.nombre || 'Carta')}')"
+                                 onerror="this.style.display='none'" />
+                        ` : '<div class="card-thumbnail" style="background: #f0f0f0; display: flex; align-items: center; justify-content: center; font-size: 0.6em; color: #999; width: 35px; height: 49px; flex-shrink: 0;">?</div>'}
+                        <span class="card-name">
+                            ${escapeHtml(card.nombre || 'Sin nombre')}
+                            ${isOroInicial ? '<span style="color: #667eea; font-size: 0.8em;"> ⭐ (Oro Inicial)</span>' : ''}
+                        </span>
+                        <div class="card-controls">
+                            ${isOroInicial ? '' : `
+                                <button class="btn btn-primary btn-card-control" 
+                                        onclick="addCardCopy('${cardId}')" 
+                                        ${!puedeAgregar ? 'disabled' : ''}
+                                        title="Agregar copia">
+                                    +
+                                </button>
+                            `}
+                            <span class="card-count">${count}</span>
+                            ${isOroInicial ? '<span style="color: #667eea; font-size: 0.75em; padding: 0 5px;">Fijo</span>' : `
+                                <button class="btn btn-secondary btn-card-control" 
+                                        onclick="removeCardCopy('${cardId}')" 
+                                        ${!puedeQuitar ? 'disabled' : ''}
+                                        title="Quitar copia">
+                                    -
+                                </button>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function addCardCopy(cardId) {
+            const card = allCards.find(c => c.id === cardId);
+            if (!card) return;
+            
+            // Verificar límite de tamaño del mazo (50 cartas máximo)
+            if (deckCards.length >= 50) {
+                showError('El mazo ha alcanzado el límite máximo de 50 cartas');
+                return;
+            }
+            
+            // Verificar límites por nombre (máximo 3, o 1 si es única)
+            const esUnica = card.rareza === 'Única' || card.rareza === 'Unica';
+            const maxCopias = esUnica ? 1 : 3;
+            
+            // Contar cartas con el mismo nombre en el mazo (excluyendo el oro inicial)
+            const cartasConMismoNombre = deckCards.filter(id => {
+                if (id === oroInicialId) return false; // Excluir oro inicial del conteo
+                const cartaEnMazo = allCards.find(c => c.id === id);
+                return cartaEnMazo && cartaEnMazo.nombre === card.nombre;
+            }).length;
+            
+            if (cartasConMismoNombre >= maxCopias) {
+                showError(`No se pueden agregar más de ${maxCopias} copia${maxCopias > 1 ? 's' : ''} de "${card.nombre}"`);
+                return;
+            }
+            
+            deckCards.push(cardId);
+            updateDeckStats();
+            updateDeckList();
+            validateDeck();
+        }
+
+        function removeCardCopy(cardId) {
+            const index = deckCards.indexOf(cardId);
+            if (index > -1) {
+                deckCards.splice(index, 1);
+                updateDeckStats();
+                updateDeckList();
+                validateDeck();
+            }
+        }
+
+        function openCardImageModal(imageUrl, cardName) {
+            const modal = document.getElementById('imageModal');
+            const modalImage = document.getElementById('modalLargeImage');
+            const modalTitle = document.getElementById('imageModalTitle');
+            
+            if (modal && modalImage && modalTitle) {
+                modalImage.src = imageUrl;
+                modalTitle.textContent = cardName || 'Imagen de Carta';
+                modal.classList.add('show');
+            }
+        }
+
+        function closeCardImageModal() {
+            const modal = document.getElementById('imageModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        }
+
+        async function validateDeck() {
+            const deckData = {
+                cartas: deckCards,
+                formato: document.getElementById('deckFormat').value,
+                raza: document.getElementById('deckRaza').value || null,
+                edicion_original: document.getElementById('deckEdicion').value || null,
+                oro_inicial_id: oroInicialId || deckCards.find(id => {
+                    const card = allCards.find(c => c.id === id);
+                    return card && card.tipo === 'Oro';
+                }) || null
+            };
+
+            try {
+                const response = await api.validateDeck(deckData);
+                const errorsDiv = document.getElementById('validationErrors');
+                const errorsList = document.getElementById('validationErrorsList');
+
+                if (response.valido) {
+                    errorsDiv.classList.remove('show');
+                } else {
+                    errorsDiv.classList.add('show');
+                    errorsList.innerHTML = response.errores.map(e => `<li>${escapeHtml(e)}</li>`).join('');
+                }
+            } catch (error) {
+                // Ignorar errores de validación
+            }
+        }
+
+        async function saveDeck() {
+            const nombre = document.getElementById('deckNameInput').value.trim();
+            if (!nombre) {
+                showError('El nombre del mazo es requerido');
+                return;
+            }
+
+            // Validar que si es formato racial, tenga edición y raza
+            const formato = document.getElementById('deckFormat').value;
+            const edicion = document.getElementById('deckEdicion').value;
+            const raza = document.getElementById('deckRaza').value;
+            
+            if ((formato === 'Racial Edición' || formato === 'Racial Soporte Libre') && (!edicion || !raza)) {
+                showError('Para formatos raciales, debes seleccionar edición y raza');
+                return;
+            }
+            
+            if ((formato === 'Racial Edición' || formato === 'Racial Soporte Libre') && !oroInicialId) {
+                showError('Debes seleccionar un oro inicial para este formato');
+                return;
+            }
+
+            const deckData = {
+                nombre,
+                descripcion: document.getElementById('deckDescription').value.trim(),
+                formato,
+                raza: raza || null,
+                edicion_original: edicion || null,
+                cartas: deckCards,
+                oro_inicial_id: oroInicialId || null,
+                es_publico: false
+            };
+
+            try {
+                let response;
+                if (currentDeckId) {
+                    response = await api.updateDeck(currentDeckId, deckData);
+                } else {
+                    response = await api.createDeck(deckData);
+                }
+
+                if (response.success) {
+                    showSuccess('Mazo guardado correctamente');
+                    setTimeout(() => {
+                        window.location.href = 'decks.html';
+                    }, 1500);
+                } else {
+                    showError(response.error || 'Error al guardar el mazo');
+                }
+            } catch (error) {
+                showError('Error al guardar el mazo: ' + error.message);
+            }
+        }
+
+        async function loadDeck(id) {
+            try {
+                const response = await api.getDeck(id);
+                if (response.success) {
+                    currentDeck = response.data;
+                    currentDeckId = id;
+                    
+                    document.getElementById('deckNameInput').value = currentDeck.nombre || '';
+                    document.getElementById('deckDescription').value = currentDeck.descripcion || '';
+                    document.getElementById('deckFormat').value = currentDeck.formato || 'Racial Edición';
+                    document.getElementById('deckEdicion').value = currentDeck.edicion_original || '';
+                    document.getElementById('deckRaza').value = currentDeck.raza || '';
+                    document.getElementById('deckName').textContent = currentDeck.nombre || 'Mazo';
+                    
+                    // Configurar formato y cargar oros iniciales si aplica
+                    onFormatChange();
+                    
+                    // Si hay oro inicial, configurarlo
+                    if (currentDeck.oro_inicial_id) {
+                        oroInicialId = currentDeck.oro_inicial_id;
+                        document.getElementById('oroInicial').value = currentDeck.oro_inicial_id;
+                        // Asegurar que esté en el mazo (al inicio, solo una vez)
+                        if (!currentDeck.cartas.includes(oroInicialId)) {
+                            currentDeck.cartas.unshift(oroInicialId);
+                        } else {
+                            // Si ya está, moverlo al inicio
+                            currentDeck.cartas = currentDeck.cartas.filter(id => id !== oroInicialId);
+                            currentDeck.cartas.unshift(oroInicialId);
+                        }
+                    }
+                    
+                    deckCards = currentDeck.cartas || [];
+                    updateDeckStats();
+                    updateDeckList();
+                    validateDeck();
+                    // Aplicar filtros después de cargar
+                    onDeckConfigChange();
+                }
+            } catch (error) {
+                showError('Error al cargar el mazo: ' + error.message);
+            }
+        }
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Event listener para cerrar modal
+        document.addEventListener('DOMContentLoaded', () => {
+            init();
+            
+            const closeModal = document.getElementById('closeImageModal');
+            const imageModal = document.getElementById('imageModal');
+            
+            if (closeModal) {
+                closeModal.addEventListener('click', closeCardImageModal);
+            }
+            
+            if (imageModal) {
+                imageModal.addEventListener('click', (e) => {
+                    if (e.target === imageModal) {
+                        closeCardImageModal();
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
+

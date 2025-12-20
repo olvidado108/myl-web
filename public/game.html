@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jugar Partida - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/game.css">
+    <style>
+        body {
+            display: block !important;
+            padding: 0 !important;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="navbar-container" id="navbar-container">
+            <!-- Se llenará dinámicamente -->
+        </div>
+    </nav>
+
+    <!-- Modal para crear/seleccionar partida -->
+    <div id="gameSetupModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Nueva Partida</h2>
+                <span class="close" id="closeSetupModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="deckSelect">Selecciona tu mazo:</label>
+                    <select id="deckSelect" class="form-control">
+                        <option value="">Cargando mazos...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="sameDeckCheckbox">
+                        Usar el mismo mazo para el oponente (Práctica)
+                    </label>
+                </div>
+                <div class="form-actions">
+                    <button id="createGameBtn" class="btn btn-primary">Crear Partida</button>
+                    <button id="loadGameBtn" class="btn btn-secondary">Cargar Partida Existente</button>
+                </div>
+                <div id="existingGamesList" style="display: none; margin-top: 20px;">
+                    <h3>Partidas en Curso</h3>
+                    <div id="gamesList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Vista principal del juego -->
+    <div id="gameContainer" style="display: none;">
+        <!-- Información del turno y fase -->
+        <div class="game-header">
+            <div class="game-info">
+                <div class="turn-info">
+                    <span id="currentPhase" class="phase-badge">Fase: Inicio</span>
+                    <span id="turnNumber" class="turn-number">Turno 1</span>
+                </div>
+                <div class="player-info">
+                    <span id="currentPlayer"></span>
+                </div>
+            </div>
+            <div class="game-actions-top">
+                <button id="passPhaseBtn" class="btn btn-sm">Pasar Fase</button>
+                <button id="passTurnBtn" class="btn btn-sm">Pasar Turno</button>
+                <button id="endGameBtn" class="btn btn-sm btn-danger">Abandonar</button>
+            </div>
+        </div>
+
+        <div class="game-board">
+            <!-- Oponente -->
+            <div class="player-section opponent">
+                <div class="player-header">
+                    <h3>Oponente</h3>
+                    <div class="player-stats">
+                        <span>Mazo: <span id="opponentDeckCount">0</span></span>
+                        <span>Recursos: <span id="opponentResources">0</span></span>
+                    </div>
+                </div>
+                
+                <!-- Reserva de Oro del Oponente -->
+                <div class="zone oro-zone">
+                    <h4>Reserva de Oro</h4>
+                    <div class="cards-container" id="opponentOroZone"></div>
+                </div>
+
+                <!-- Línea de Apoyo del Oponente -->
+                <div class="zone apoyo-zone">
+                    <h4>Línea de Apoyo</h4>
+                    <div class="cards-container" id="opponentApoyoZone"></div>
+                </div>
+
+                <!-- Línea de Defensa del Oponente -->
+                <div class="zone defensa-zone">
+                    <h4>Línea de Defensa</h4>
+                    <div class="cards-container" id="opponentDefensaZone"></div>
+                </div>
+
+                <!-- Línea de Ataque del Oponente -->
+                <div class="zone ataque-zone">
+                    <h4>Línea de Ataque</h4>
+                    <div class="cards-container" id="opponentAtaqueZone"></div>
+                </div>
+            </div>
+
+            <!-- Área central (para mensajes, etc.) -->
+            <div class="center-area">
+                <div id="gameMessages"></div>
+            </div>
+
+            <!-- Jugador Actual -->
+            <div class="player-section player">
+                <div class="player-header">
+                    <h3>Tú</h3>
+                    <div class="player-stats">
+                        <span>Mazo: <span id="playerDeckCount">0</span></span>
+                        <span>Recursos: <span id="playerResources">0</span>/<span id="playerResourcesTotal">0</span></span>
+                    </div>
+                </div>
+
+                <!-- Línea de Defensa -->
+                <div class="zone defensa-zone">
+                    <h4>Línea de Defensa</h4>
+                    <div class="cards-container" id="playerDefensaZone"></div>
+                </div>
+
+                <!-- Línea de Ataque -->
+                <div class="zone ataque-zone">
+                    <h4>Línea de Ataque</h4>
+                    <div class="cards-container" id="playerAtaqueZone"></div>
+                </div>
+
+                <!-- Línea de Apoyo -->
+                <div class="zone apoyo-zone">
+                    <h4>Línea de Apoyo</h4>
+                    <div class="cards-container" id="playerApoyoZone"></div>
+                </div>
+
+                <!-- Reserva de Oro -->
+                <div class="zone oro-zone">
+                    <h4>Reserva de Oro</h4>
+                    <div class="cards-container" id="playerOroZone"></div>
+                </div>
+
+                <!-- Cementerio y Mazo -->
+                <div class="zone misc-zone">
+                    <div class="misc-cards">
+                        <div class="misc-card">
+                            <h5>Cementerio</h5>
+                            <div class="card-count" id="playerCementerioCount">0</div>
+                        </div>
+                        <div class="misc-card">
+                            <h5>Mazo</h5>
+                            <div class="card-count" id="playerMazoCount">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mano del Jugador -->
+                <div class="zone mano-zone">
+                    <h4>Tu Mano (<span id="handCount">0</span>)</h4>
+                    <div class="cards-container hand-container" id="playerHandZone"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para seleccionar objetivo al atacar -->
+    <div id="targetModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Seleccionar Objetivo</h2>
+                <span class="close" id="closeTargetModal">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Selecciona el objetivo del ataque:</p>
+                <div id="targetOptions"></div>
+                <button id="attackCastleBtn" class="btn btn-danger">Atacar Castillo</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para descartar cartas (si hay más de 8) -->
+    <div id="discardModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Descartar Cartas</h2>
+            </div>
+            <div class="modal-body">
+                <p>Tienes más de 8 cartas. Debes descartar hasta tener 8.</p>
+                <div id="discardOptions" class="cards-container"></div>
+                <button id="confirmDiscardBtn" class="btn btn-primary" disabled>Confirmar Descarte</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="js/game.js"></script>
+    <script>
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth(true);
+            await initNavbar();
+            await initGame();
+        });
+    </script>
+</body>
+</html>
+

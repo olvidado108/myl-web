@@ -1,0 +1,51 @@
+═══════════════════════════════════════════════════════════════
+  INSTRUCCIONES PARA DESCARGAR TODO DESDE LAS APIs
+═══════════════════════════════════════════════════════════════
+
+Este script descarga TODOS los datos desde las APIs y las imágenes.
+
+1. Abre PowerShell o Terminal
+
+2. Navega a la carpeta del proyecto:
+   cd C:\Users\OLVIDADO\Documents\myl
+
+3. Ejecuta el script Python:
+   python scripts/download_cards_new.py
+
+4. Espera a que termine (puede tardar MUCHO tiempo)
+
+═══════════════════════════════════════════════════════════════
+
+El script hará lo siguiente:
+✅ Descargará cartas de las 4 ediciones desde las APIs:
+   - Espada Sagrada (edition1)
+   - Helénica (edition2)
+   - Hijos De Daana (edition3)
+   - Dominios De Ra (edition4)
+
+✅ Guardará todas las cartas en la base de datos:
+   server/data/cards/cards_new.db
+
+✅ Descargará y organizará las imágenes en:
+   public/images/cards_new/{edicion}/{raza}/{tipo}/
+
+✅ Intentará cada imagen hasta 10 veces
+✅ Si falla después de 10 intentos, la saltará y continuará
+✅ Mostrará progreso en tiempo real
+
+═══════════════════════════════════════════════════════════════
+
+NOTAS IMPORTANTES:
+- ⚠️  Este proceso puede tardar HORAS debido a rate limits de Google Drive
+- ⚠️  El script espera 1.5 segundos entre cada descarga
+- ⚠️  Si hay error 429 (Too Many Requests), espera más tiempo automáticamente
+- ⚠️  Puedes detener el script (Ctrl+C) y volver a ejecutarlo después
+- ⚠️  No descargará imágenes que ya existen
+
+═══════════════════════════════════════════════════════════════
+
+Para verificar resultados después de ejecutar:
+python -c "import sqlite3; conn = sqlite3.connect('server/data/cards/cards_new.db'); cursor = conn.cursor(); cursor.execute('SELECT edicion, COUNT(*) FROM cartas GROUP BY edicion'); print('Cartas por edición:'); [print(f'  {row[0]}: {row[1]} cartas') for row in cursor.fetchall()]); cursor.execute('SELECT COUNT(*) FROM cartas WHERE imagenUrl IS NOT NULL AND imagenUrl != \"\"'); print(f'Cartas con URL de imagen: {cursor.fetchone()[0]}'); conn.close()"
+
+═══════════════════════════════════════════════════════════════
+

@@ -1,0 +1,42 @@
+[gd_scene load_steps=1 format=3 uid="uid://modal_descarte"]
+
+[node name="ModalDescarte" type="Window"]
+title = "Descarta cartas"
+visible = false
+size = Vector2(520, 360)
+
+[node name="Info" type="Label" parent="."]
+anchors_preset = 8
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 0.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = 36.0
+text = "Selecciona cartas para descartar hasta quedar con 8 en mano."
+
+[node name="HandList" type="ItemList" parent="."]
+anchors_preset = 8
+anchor_left = 0.0
+anchor_top = 0.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 48.0
+offset_right = -8.0
+offset_bottom = -52.0
+select_mode = 1
+
+[node name="Confirm" type="Button" parent="."]
+anchors_preset = 12
+anchor_left = 0.5
+anchor_top = 1.0
+anchor_right = 0.5
+anchor_bottom = 1.0
+offset_left = -60.0
+offset_top = -36.0
+offset_right = 60.0
+offset_bottom = -8.0
+text = "Descartar"

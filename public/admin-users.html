@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Usuarios - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/floating-cards.css">
+    <style>
+        body {
+            display: block !important;
+            padding: 0 !important;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .navbar {
+            position: relative;
+            z-index: 1000;
+        }
+
+        .admin-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+            position: relative;
+            z-index: 10;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            color: #333;
+            margin: 0;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+        }
+
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #333;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background: #f8f9fa;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+        }
+
+        .badge-admin {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-user {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-active {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge-inactive {
+            background: #6c757d;
+            color: white;
+        }
+
+        .actions {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-small {
+            padding: 5px 10px;
+            font-size: 0.85em;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cartas flotantes de fondo -->
+    <div class="floating-cards-background" id="floatingCardsBackground"></div>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="navbar-container" id="navbar-container">
+            <!-- Se llenará dinámicamente -->
+        </div>
+    </nav>
+
+    <div class="admin-container">
+        <div class="header">
+            <h1>👥 Gestión de Usuarios</h1>
+        </div>
+
+        <div id="errorMessage" class="message error"></div>
+        <div id="successMessage" class="message success"></div>
+
+        <div id="loadingMessage" class="loading">
+            <p>Cargando usuarios...</p>
+        </div>
+
+        <div id="usersTable" style="display: none;">
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Nombre Completo</th>
+                        <th>Es Admin</th>
+                        <th>Estado</th>
+                        <th>Nivel</th>
+                        <th>Registro</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody id="usersTableBody">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="js/floating-cards.js"></script>
+    <script>
+        let users = [];
+
+        async function checkAdminAccess() {
+            try {
+                const user = await checkAuth(true);
+                if (!user || !user.isAdmin) {
+                    alert('Acceso denegado: se requieren permisos de administrador');
+                    window.location.href = 'home.html';
+                    return false;
+                }
+                return true;
+            } catch (error) {
+                alert('Error al verificar permisos');
+                window.location.href = 'home.html';
+                return false;
+            }
+        }
+
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            setTimeout(() => {
+                errorDiv.style.display = 'none';
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.style.display = 'block';
+            setTimeout(() => {
+                successDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        async function loadUsers() {
+            try {
+                const response = await api.getAllUsers();
+                if (response.success) {
+                    users = response.data;
+                    displayUsers();
+                } else {
+                    showError('Error al cargar usuarios');
+                }
+            } catch (error) {
+                showError('Error al cargar usuarios: ' + error.message);
+            } finally {
+                document.getElementById('loadingMessage').style.display = 'none';
+                document.getElementById('usersTable').style.display = 'block';
+            }
+        }
+
+        function displayUsers() {
+            const tbody = document.getElementById('usersTableBody');
+            tbody.innerHTML = '';
+
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                
+                const rolBadge = user.isAdmin 
+                    ? '<span class="badge badge-admin">Admin</span>'
+                    : '<span class="badge badge-user">Usuario</span>';
+                
+                const estadoBadge = user.activo
+                    ? '<span class="badge badge-active">Activo</span>'
+                    : '<span class="badge badge-inactive">Inactivo</span>';
+
+                const fechaRegistro = user.fecha_registro 
+                    ? new Date(user.fecha_registro).toLocaleDateString('es-ES')
+                    : '-';
+
+                row.innerHTML = `
+                    <td><small>${user.id.substring(0, 12)}...</small></td>
+                    <td><strong>${user.username || '-'}</strong></td>
+                    <td>${user.email || '-'}</td>
+                    <td>${user.nombre_completo || '-'}</td>
+                    <td>${rolBadge}</td>
+                    <td>${estadoBadge}</td>
+                    <td>${user.nivel || 1}</td>
+                    <td>${fechaRegistro}</td>
+                    <td>
+                        <div class="actions">
+                            <button class="btn btn-primary btn-small" onclick="toggleRole('${user.id}', ${user.isAdmin})">
+                                ${user.isAdmin ? 'Quitar Admin' : 'Hacer Admin'}
+                            </button>
+                            <button class="btn btn-${user.activo ? 'danger' : 'success'} btn-small" onclick="toggleStatus('${user.id}', ${user.activo})">
+                                ${user.activo ? 'Desactivar' : 'Activar'}
+                            </button>
+                        </div>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        async function toggleRole(userId, currentIsAdmin) {
+            if (!confirm(`¿Estás seguro de cambiar el rol de este usuario?`)) {
+                return;
+            }
+
+            const newIsAdmin = !currentIsAdmin;
+            
+            try {
+                const response = await api.updateUserAsAdmin(userId, { isAdmin: newIsAdmin });
+                if (response.success) {
+                    showSuccess(`Rol cambiado a ${newIsAdmin ? 'administrador' : 'usuario'}`);
+                    loadUsers();
+                } else {
+                    showError('Error al cambiar el rol');
+                }
+            } catch (error) {
+                showError('Error al cambiar el rol: ' + error.message);
+            }
+        }
+
+        async function toggleStatus(userId, currentStatus) {
+            const action = currentStatus ? 'desactivar' : 'activar';
+            if (!confirm(`¿Estás seguro de ${action} este usuario?`)) {
+                return;
+            }
+
+            try {
+                const response = await api.updateUserAsAdmin(userId, { activo: !currentStatus });
+                if (response.success) {
+                    showSuccess(`Usuario ${!currentStatus ? 'activado' : 'desactivado'} correctamente`);
+                    loadUsers();
+                } else {
+                    showError('Error al cambiar el estado');
+                }
+            } catch (error) {
+                showError('Error al cambiar el estado: ' + error.message);
+            }
+        }
+
+        // Inicializar
+        document.addEventListener('DOMContentLoaded', async () => {
+            const hasAccess = await checkAdminAccess();
+            if (hasAccess) {
+                loadUsers();
+            }
+        });
+    </script>
+</body>
+</html>

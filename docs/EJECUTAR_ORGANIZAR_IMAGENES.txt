@@ -1,0 +1,39 @@
+═══════════════════════════════════════════════════════════════
+  INSTRUCCIONES PARA ORGANIZAR IMÁGENES DESDE RUTAS
+═══════════════════════════════════════════════════════════════
+
+Este script busca las imágenes usando las RUTAS de la columna 'imagen'
+de la base de datos y las organiza en la estructura correcta.
+
+1. Abre PowerShell o Terminal
+
+2. Navega a la carpeta del proyecto:
+   cd C:\Users\OLVIDADO\Documents\myl
+
+3. Ejecuta el script Python:
+   python scripts/organizar_imagenes_desde_rutas.py
+
+4. Espera a que termine
+
+═══════════════════════════════════════════════════════════════
+
+El script hará lo siguiente:
+✅ Leerá las rutas de la columna 'imagen' de la base de datos
+✅ Buscará las imágenes en: public/images/cards/
+✅ Las copiará y organizará en:
+   public/images/cards_new/{edicion}/{raza}/{tipo}/
+
+✅ Actualizará la base de datos con las rutas organizadas
+✅ Guardará las que no se encontraron en:
+   server/data/cards/imagenes_no_encontradas.txt
+
+═══════════════════════════════════════════════════════════════
+
+NOTAS IMPORTANTES:
+- ⚠️  Las imágenes deben estar en: public/images/cards/
+- ⚠️  El script busca usando las rutas como "colmillos_avalon/1.png"
+- ⚠️  Si no encuentra una imagen, la buscará por nombre de archivo
+- ⚠️  No descarga imágenes, solo las organiza desde donde ya están
+
+═══════════════════════════════════════════════════════════════
+

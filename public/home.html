@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Inicio - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/floating-cards.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+            margin: 0;
+            position: relative;
+            overflow-x: hidden;
+            display: block !important;
+        }
+
+        .body-content-wrapper {
+            padding: 20px;
+            position: relative;
+            z-index: 2;
+        }
+        
+        .navbar {
+            position: relative;
+            z-index: 1000;
+        }
+
+        .home-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.75);
+            backdrop-filter: blur(5px);
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+            padding: 40px;
+            animation: fadeIn 0.5s ease-in;
+            position: relative;
+            z-index: 2;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-bottom: 30px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .header img {
+            height: 80px;
+            width: auto;
+            margin-bottom: 20px;
+            object-fit: contain;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            color: #333;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header-description {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto 40px auto;
+            padding: 30px;
+            background: rgba(248, 249, 250, 0.85);
+            border-radius: 15px;
+            backdrop-filter: blur(3px);
+        }
+
+        .header-description h2 {
+            color: #333;
+            font-size: 1.8em;
+            margin-bottom: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .description-logo {
+            height: 120px;
+            width: auto;
+            margin: 0 auto 25px auto;
+            display: block;
+            object-fit: contain;
+        }
+
+        .header-description p {
+            color: #555;
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .header-description .features-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 25px;
+        }
+
+        .header-description .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+            font-size: 1em;
+            color: #333;
+        }
+
+        .header-description .feature-icon {
+            font-size: 1.5em;
+        }
+
+        .user-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: rgba(248, 249, 250, 0.85);
+            border-radius: 10px;
+            backdrop-filter: blur(3px);
+        }
+
+        .user-details {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+
+        .user-text h3 {
+            margin: 0;
+            color: #333;
+            font-size: 1.2em;
+        }
+
+        .user-text p {
+            margin: 5px 0 0 0;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge-admin {
+            background: #dc3545;
+            color: white;
+        }
+
+        .badge-user {
+            background: #28a745;
+            color: white;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.95em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-top: 30px;
+        }
+
+        .section-card {
+            background: rgba(248, 249, 250, 0.85);
+            border-radius: 15px;
+            padding: 25px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            backdrop-filter: blur(3px);
+        }
+
+        .section-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            border-color: #667eea;
+        }
+
+        .section-card h2 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-card p {
+            color: #666;
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .section-links {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-link {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            background: white;
+            border-radius: 8px;
+            text-decoration: none;
+            color: #333;
+            transition: all 0.2s ease;
+            border-left: 4px solid transparent;
+        }
+
+        .section-link:hover {
+            border-left-color: #667eea;
+            background: #f0f0f0;
+            transform: translateX(5px);
+        }
+
+        .section-link-icon {
+            margin-right: 10px;
+            font-size: 1.2em;
+        }
+
+        .admin-only {
+            border-left: 4px solid #dc3545;
+        }
+
+        .admin-only .section-link {
+            border-left-color: #dc3545;
+        }
+
+        .admin-only .section-link:hover {
+            border-left-color: #dc3545;
+            background: #ffe6e6;
+        }
+
+        .welcome-message {
+            text-align: center;
+            padding: 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+            margin-bottom: 30px;
+        }
+
+        .welcome-message h2 {
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .welcome-message p {
+            font-size: 1.1em;
+            opacity: 0.9;
+        }
+
+        .not-authenticated {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .not-authenticated h2 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .not-authenticated p {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 1.1em;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+    </style>
+</head>
+<body>
+    <!-- Cartas flotantes de fondo -->
+    <div class="floating-cards-background" id="floatingCardsBackground"></div>
+
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="navbar-container" id="navbar-container">
+            <!-- Se llenará dinámicamente -->
+        </div>
+    </nav>
+
+    <div class="body-content-wrapper">
+        <div class="home-container">
+            <!-- Descripción de la plataforma -->
+            <div class="header-description">
+                <h2>Tu plataforma completa para jugar Mitos y Leyendas</h2>
+                <img src="images/logo.webp" alt="Mitos y Leyendas Logo" class="description-logo">
+                <p>
+                    Descubre y explora el mundo de Mitos y Leyendas en esta plataforma web diseñada para jugadores 
+                    apasionados. Navega por nuestra extensa colección de cartas, construye y personaliza tus mazos, 
+                    prueba diferentes estrategias y sumérgete en el emocionante universo del juego de cartas más 
+                    legendario de Chile.
+                </p>
+                <div class="features-list">
+                    <div class="feature-item">
+                        <span class="feature-icon">🃏</span>
+                        <span>Explora miles de cartas</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🎴</span>
+                        <span>Arma y gestiona tus mazos</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">🎮</span>
+                        <span>Prueba estrategias y combinaciones</span>
+                    </div>
+                    <div class="feature-item">
+                        <span class="feature-icon">📊</span>
+                        <span>Consulta estadísticas y habilidades</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="userSection" style="display: none;">
+                <div class="user-info">
+                    <div class="user-details">
+                        <div class="user-avatar" id="userAvatar">👤</div>
+                        <div class="user-text">
+                            <h3 id="userName">Usuario</h3>
+                            <p id="userEmail">email@ejemplo.com</p>
+                        </div>
+                        <span id="userBadge" class="badge badge-user">Usuario</span>
+                    </div>
+                    <div class="nav-buttons">
+                        <a href="profile.html" class="btn btn-primary">Mi Perfil</a>
+                        <button onclick="logout()" class="btn btn-danger">Cerrar Sesión</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="notAuthenticatedSection" style="display: none;">
+                <div class="not-authenticated">
+                    <h2>¡Comienza tu aventura!</h2>
+                    <p>
+                        Para aprovechar al máximo todas las funcionalidades, como crear y gestionar tus mazos, 
+                        guardar tus estrategias favoritas y acceder a estadísticas personalizadas, inicia sesión 
+                        o crea una cuenta gratuita.
+                    </p>
+                    <p style="margin-top: 15px; font-weight: 600;">
+                        Puedes explorar la colección de cartas sin necesidad de registrarte, pero al iniciar sesión 
+                        desbloqueas todas las características de la plataforma.
+                    </p>
+                    <div class="action-buttons">
+                        <a href="login.html" class="btn btn-primary">Iniciar Sesión</a>
+                        <a href="register.html" class="btn btn-secondary">Crear Cuenta</a>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="js/floating-cards.js"></script>
+    <script>
+        // currentUser ya está declarado en navbar.js, solo lo usamos aquí
+        // loadFloatingCards() está en floating-cards.js y se ejecuta automáticamente
+
+        async function loadHome() {
+            try {
+                // Verificar si hay usuario autenticado
+                if (api.isAuthenticated()) {
+                    const userResponse = await api.getCurrentUser();
+                    if (userResponse.success) {
+                        currentUser = userResponse.data;
+                        showAuthenticatedView(currentUser);
+                    } else {
+                        showNotAuthenticatedView();
+                    }
+                } else {
+                    showNotAuthenticatedView();
+                }
+            } catch (error) {
+                console.error('Error al cargar página:', error);
+                showNotAuthenticatedView();
+            }
+        }
+
+        function showAuthenticatedView(user) {
+            document.getElementById('notAuthenticatedSection').style.display = 'none';
+            document.getElementById('userSection').style.display = 'block';
+
+            // Mostrar información del usuario
+            document.getElementById('userName').textContent = user.username || 'Usuario';
+            document.getElementById('userEmail').textContent = user.email || '';
+            
+            // Avatar
+            const avatar = document.getElementById('userAvatar');
+            if (user.avatar_url) {
+                avatar.style.backgroundImage = `url(${user.avatar_url})`;
+                avatar.textContent = '';
+            } else {
+                avatar.textContent = (user.username?.charAt(0) || 'U').toUpperCase();
+            }
+
+            // Badge de rol
+            const badge = document.getElementById('userBadge');
+            if (user.isAdmin) {
+                badge.textContent = 'Administrador';
+                badge.className = 'badge badge-admin';
+            } else {
+                badge.textContent = 'Usuario';
+                badge.className = 'badge badge-user';
+            }
+        }
+
+        function showNotAuthenticatedView() {
+            document.getElementById('userSection').style.display = 'none';
+            document.getElementById('notAuthenticatedSection').style.display = 'block';
+        }
+
+        // Cargar cuando el DOM esté listo
+        // loadFloatingCards() se ejecuta automáticamente desde floating-cards.js
+        document.addEventListener('DOMContentLoaded', loadHome);
+    </script>
+</body>
+</html>

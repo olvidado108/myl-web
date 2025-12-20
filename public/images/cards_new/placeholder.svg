@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="240" height="336" viewBox="0 0 240 336" fill="none">
+  <rect x="1" y="1" width="238" height="334" rx="12" ry="12" fill="#f3f4f6" stroke="#d1d5db" stroke-width="2" />
+  <rect x="24" y="56" width="192" height="112" rx="10" ry="10" fill="#e5e7eb" stroke="#cbd5e1" stroke-width="2" />
+  <circle cx="120" cy="112" r="26" fill="#dbeafe" stroke="#93c5fd" stroke-width="3" />
+  <path d="M105 118l13-18 10 14 8-10 11 14" stroke="#3b82f6" stroke-width="5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  <rect x="24" y="188" width="192" height="96" rx="8" ry="8" fill="#fff" stroke="#d1d5db" stroke-width="2" />
+  <text x="32" y="214" font-family="Arial, sans-serif" font-size="14" fill="#4b5563">Sin imagen disponible</text>
+  <text x="32" y="240" font-family="Arial, sans-serif" font-size="12" fill="#6b7280">Ruta: public/images/cards_new</text>
+  <text x="32" y="264" font-family="Arial, sans-serif" font-size="12" fill="#9ca3af">Configurable con CARD_PLACEHOLDER</text>
+</svg>
