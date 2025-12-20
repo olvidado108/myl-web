@@ -1,0 +1,176 @@
+/* Estilos para cartas flotantes de fondo */
+
+/* Contenedor de cartas de fondo */
+.floating-cards-background {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    overflow: hidden;
+    /* Optimización de rendimiento */
+    transform: translateZ(0);
+    will-change: contents;
+}
+
+.floating-card {
+    position: absolute;
+    opacity: 1.0;
+    filter: blur(0px);
+    transition: opacity 0.3s ease;
+    animation: float 20s infinite ease-in-out;
+    will-change: transform;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    /* Optimización de rendimiento */
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+}
+
+.floating-card:hover {
+    opacity: 1.0;
+}
+
+/* Diferentes tamaños de cartas */
+.floating-card.small {
+    width: 80px;
+    height: 112px;
+}
+
+.floating-card.medium {
+    width: 120px;
+    height: 168px;
+}
+
+.floating-card.large {
+    width: 160px;
+    height: 224px;
+}
+
+.floating-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+}
+
+/* Animación de flotación suave */
+@keyframes float {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    25% {
+        transform: translate(15px, -20px) rotate(1.5deg);
+    }
+    50% {
+        transform: translate(-10px, 15px) rotate(-1.5deg);
+    }
+    75% {
+        transform: translate(8px, -10px) rotate(0.8deg);
+    }
+}
+
+/* Animación alternativa para más variedad */
+@keyframes floatAlt {
+    0%, 100% {
+        transform: translate(0, 0) rotate(0deg);
+    }
+    33% {
+        transform: translate(-12px, 18px) rotate(-1.2deg);
+    }
+    66% {
+        transform: translate(18px, -12px) rotate(1.8deg);
+    }
+}
+
+/* Animaciones individuales para cada carta con diferentes duraciones y delays */
+/* Optimizado para máximo 80 cartas - usando patrones repetitivos para mejor rendimiento */
+/* Patrón base para las primeras 20 cartas */
+.floating-card:nth-child(1) { animation: float 18s infinite ease-in-out; animation-delay: 0s; }
+.floating-card:nth-child(2) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 2s; }
+.floating-card:nth-child(3) { animation: float 20s infinite ease-in-out; animation-delay: 4s; }
+.floating-card:nth-child(4) { animation: floatAlt 25s infinite ease-in-out; animation-delay: 1s; }
+.floating-card:nth-child(5) { animation: float 19s infinite ease-in-out; animation-delay: 3s; }
+.floating-card:nth-child(6) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 5s; }
+.floating-card:nth-child(7) { animation: float 21s infinite ease-in-out; animation-delay: 1.5s; }
+.floating-card:nth-child(8) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 3.5s; }
+.floating-card:nth-child(9) { animation: float 20s infinite ease-in-out; animation-delay: 2.5s; }
+.floating-card:nth-child(10) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 4.5s; }
+.floating-card:nth-child(11) { animation: float 19s infinite ease-in-out; animation-delay: 0.5s; }
+.floating-card:nth-child(12) { animation: floatAlt 26s infinite ease-in-out; animation-delay: 6s; }
+.floating-card:nth-child(13) { animation: float 21s infinite ease-in-out; animation-delay: 2.2s; }
+.floating-card:nth-child(14) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 4.8s; }
+.floating-card:nth-child(15) { animation: float 20s infinite ease-in-out; animation-delay: 1.8s; }
+.floating-card:nth-child(16) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 3.2s; }
+.floating-card:nth-child(17) { animation: float 19s infinite ease-in-out; animation-delay: 5.5s; }
+.floating-card:nth-child(18) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 1.2s; }
+.floating-card:nth-child(19) { animation: float 25s infinite ease-in-out; animation-delay: 4.2s; }
+.floating-card:nth-child(20) { animation: floatAlt 21s infinite ease-in-out; animation-delay: 2.8s; }
+/* Patrón para cartas 21-40 */
+.floating-card:nth-child(21) { animation: float 18s infinite ease-in-out; animation-delay: 0.3s; }
+.floating-card:nth-child(22) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 2.3s; }
+.floating-card:nth-child(23) { animation: float 20s infinite ease-in-out; animation-delay: 4.3s; }
+.floating-card:nth-child(24) { animation: floatAlt 25s infinite ease-in-out; animation-delay: 1.3s; }
+.floating-card:nth-child(25) { animation: float 19s infinite ease-in-out; animation-delay: 3.3s; }
+.floating-card:nth-child(26) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 5.3s; }
+.floating-card:nth-child(27) { animation: float 21s infinite ease-in-out; animation-delay: 1.8s; }
+.floating-card:nth-child(28) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 3.8s; }
+.floating-card:nth-child(29) { animation: float 20s infinite ease-in-out; animation-delay: 2.8s; }
+.floating-card:nth-child(30) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 4.8s; }
+.floating-card:nth-child(31) { animation: float 19s infinite ease-in-out; animation-delay: 0.8s; }
+.floating-card:nth-child(32) { animation: floatAlt 26s infinite ease-in-out; animation-delay: 6.3s; }
+.floating-card:nth-child(33) { animation: float 21s infinite ease-in-out; animation-delay: 2.5s; }
+.floating-card:nth-child(34) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 5s; }
+.floating-card:nth-child(35) { animation: float 20s infinite ease-in-out; animation-delay: 2s; }
+.floating-card:nth-child(36) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 3.5s; }
+.floating-card:nth-child(37) { animation: float 19s infinite ease-in-out; animation-delay: 5.8s; }
+.floating-card:nth-child(38) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 1.5s; }
+.floating-card:nth-child(39) { animation: float 25s infinite ease-in-out; animation-delay: 4.5s; }
+.floating-card:nth-child(40) { animation: floatAlt 21s infinite ease-in-out; animation-delay: 3s; }
+/* Patrón para cartas 41-60 */
+.floating-card:nth-child(41) { animation: float 18s infinite ease-in-out; animation-delay: 0.6s; }
+.floating-card:nth-child(42) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 2.6s; }
+.floating-card:nth-child(43) { animation: float 20s infinite ease-in-out; animation-delay: 4.6s; }
+.floating-card:nth-child(44) { animation: floatAlt 25s infinite ease-in-out; animation-delay: 1.6s; }
+.floating-card:nth-child(45) { animation: float 19s infinite ease-in-out; animation-delay: 3.6s; }
+.floating-card:nth-child(46) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 5.6s; }
+.floating-card:nth-child(47) { animation: float 21s infinite ease-in-out; animation-delay: 2.1s; }
+.floating-card:nth-child(48) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 4.1s; }
+.floating-card:nth-child(49) { animation: float 20s infinite ease-in-out; animation-delay: 2.9s; }
+.floating-card:nth-child(50) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 5.1s; }
+.floating-card:nth-child(51) { animation: float 19s infinite ease-in-out; animation-delay: 1.1s; }
+.floating-card:nth-child(52) { animation: floatAlt 26s infinite ease-in-out; animation-delay: 6.6s; }
+.floating-card:nth-child(53) { animation: float 21s infinite ease-in-out; animation-delay: 2.7s; }
+.floating-card:nth-child(54) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 5.2s; }
+.floating-card:nth-child(55) { animation: float 20s infinite ease-in-out; animation-delay: 2.3s; }
+.floating-card:nth-child(56) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 3.7s; }
+.floating-card:nth-child(57) { animation: float 19s infinite ease-in-out; animation-delay: 6.1s; }
+.floating-card:nth-child(58) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 1.7s; }
+.floating-card:nth-child(59) { animation: float 25s infinite ease-in-out; animation-delay: 4.7s; }
+.floating-card:nth-child(60) { animation: floatAlt 21s infinite ease-in-out; animation-delay: 3.3s; }
+/* Patrón para cartas 61-80 */
+.floating-card:nth-child(61) { animation: float 18s infinite ease-in-out; animation-delay: 0.9s; }
+.floating-card:nth-child(62) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 2.9s; }
+.floating-card:nth-child(63) { animation: float 20s infinite ease-in-out; animation-delay: 4.9s; }
+.floating-card:nth-child(64) { animation: floatAlt 25s infinite ease-in-out; animation-delay: 1.9s; }
+.floating-card:nth-child(65) { animation: float 19s infinite ease-in-out; animation-delay: 3.9s; }
+.floating-card:nth-child(66) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 5.9s; }
+.floating-card:nth-child(67) { animation: float 21s infinite ease-in-out; animation-delay: 2.4s; }
+.floating-card:nth-child(68) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 4.4s; }
+.floating-card:nth-child(69) { animation: float 20s infinite ease-in-out; animation-delay: 3.1s; }
+.floating-card:nth-child(70) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 5.4s; }
+.floating-card:nth-child(71) { animation: float 19s infinite ease-in-out; animation-delay: 1.4s; }
+.floating-card:nth-child(72) { animation: floatAlt 26s infinite ease-in-out; animation-delay: 6.9s; }
+.floating-card:nth-child(73) { animation: float 21s infinite ease-in-out; animation-delay: 2.6s; }
+.floating-card:nth-child(74) { animation: floatAlt 23s infinite ease-in-out; animation-delay: 5.5s; }
+.floating-card:nth-child(75) { animation: float 20s infinite ease-in-out; animation-delay: 2.4s; }
+.floating-card:nth-child(76) { animation: floatAlt 24s infinite ease-in-out; animation-delay: 3.8s; }
+.floating-card:nth-child(77) { animation: float 19s infinite ease-in-out; animation-delay: 6.4s; }
+.floating-card:nth-child(78) { animation: floatAlt 22s infinite ease-in-out; animation-delay: 1.9s; }
+.floating-card:nth-child(79) { animation: float 25s infinite ease-in-out; animation-delay: 4.9s; }
+.floating-card:nth-child(80) { animation: floatAlt 21s infinite ease-in-out; animation-delay: 3.6s; }
+

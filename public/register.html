@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registro - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="css/auth.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <img src="images/logo.webp" alt="Mitos y Leyendas Logo" class="auth-logo">
+            <h1>Mitos y Leyendas</h1>
+            <p>Crea tu cuenta para comenzar</p>
+        </div>
+
+        <div id="errorMessage" class="message error"></div>
+        <div id="successMessage" class="message success"></div>
+
+        <form id="registerForm" class="auth-form">
+            <div class="form-group">
+                <label for="username">Nombre de Usuario *</label>
+                <input 
+                    type="text" 
+                    id="username" 
+                    name="username" 
+                    placeholder="Mínimo 3 caracteres, solo letras, números y _"
+                    required
+                    minlength="3"
+                    pattern="[a-zA-Z0-9_]+"
+                    autocomplete="username"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email *</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    placeholder="tu@email.com"
+                    required
+                    autocomplete="email"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="nombreCompleto">Nombre Completo (opcional)</label>
+                <input 
+                    type="text" 
+                    id="nombreCompleto" 
+                    name="nombreCompleto" 
+                    placeholder="Tu nombre completo"
+                    autocomplete="name"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Contraseña *</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    placeholder="Mínimo 8 caracteres"
+                    required
+                    minlength="8"
+                    autocomplete="new-password"
+                >
+                <div class="password-requirements">
+                    <strong>Requisitos:</strong>
+                    <ul>
+                        <li>Al menos 8 caracteres</li>
+                        <li>Al menos una letra mayúscula</li>
+                        <li>Al menos una letra minúscula</li>
+                        <li>Al menos un número</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="confirmPassword">Confirmar Contraseña *</label>
+                <input 
+                    type="password" 
+                    id="confirmPassword" 
+                    name="confirmPassword" 
+                    placeholder="Repite tu contraseña"
+                    required
+                    minlength="8"
+                    autocomplete="new-password"
+                >
+            </div>
+
+            <button type="submit" class="btn btn-primary">
+                Crear Cuenta
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            <p>¿Ya tienes una cuenta? <a href="login.html">Inicia sesión aquí</a></p>
+            <p style="margin-top: 10px;"><a href="/">Volver al inicio</a></p>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
+
+
+
+

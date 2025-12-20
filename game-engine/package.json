@@ -1,0 +1,21 @@
+{
+  "name": "myl-ability-system",
+  "version": "1.0.0",
+  "description": "Sistema de habilidades para Mitos y Leyendas",
+  "main": "index.js",
+  "scripts": {
+    "test": "node examples/usage-example.js",
+    "example": "node examples/usage-example.js"
+  },
+  "keywords": [
+    "card-game",
+    "abilities",
+    "mitos-y-leyendas"
+  ],
+  "author": "",
+  "license": "ISC"
+}
+
+
+
+

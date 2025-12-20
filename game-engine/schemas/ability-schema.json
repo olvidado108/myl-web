@@ -1,0 +1,310 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Card Ability Schema",
+  "description": "Schema para definir habilidades de cartas en Mitos y Leyendas",
+  "type": "object",
+  "properties": {
+    "version": {
+      "type": "string",
+      "description": "Versión del formato de habilidad"
+    },
+    "abilities": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/ability"
+      }
+    }
+  },
+  "required": ["version", "abilities"],
+  "definitions": {
+    "ability": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "ID único de la habilidad"
+        },
+        "type": {
+          "type": "string",
+          "enum": ["triggered", "static", "activated", "response"],
+          "description": "Tipo de habilidad"
+        },
+        "trigger": {
+          "$ref": "#/definitions/trigger",
+          "description": "Trigger para habilidades triggered/response"
+        },
+        "condition": {
+          "$ref": "#/definitions/condition",
+          "description": "Condiciones adicionales para activar la habilidad"
+        },
+        "effect": {
+          "$ref": "#/definitions/effect",
+          "description": "Efecto a ejecutar"
+        },
+        "cost": {
+          "$ref": "#/definitions/cost",
+          "description": "Costo para habilidades activated"
+        },
+        "optional": {
+          "type": "boolean",
+          "default": false,
+          "description": "Si la habilidad es opcional"
+        },
+        "oncePerTurn": {
+          "type": "boolean",
+          "default": false,
+          "description": "Si solo puede usarse una vez por turno"
+        },
+        "text": {
+          "type": "string",
+          "description": "Texto original de la habilidad (para referencia)"
+        }
+      },
+      "required": ["type", "effect"]
+    },
+    "trigger": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "enters_play",
+            "leaves_play",
+            "attacks",
+            "blocks",
+            "declared_attacker",
+            "declared_blocker",
+            "takes_damage",
+            "receives_damage",
+            "destroyed",
+            "phase_start",
+            "phase_end",
+            "turn_start",
+            "turn_end",
+            "card_played",
+            "ability_activated"
+          ],
+          "description": "Tipo de trigger"
+        },
+        "target": {
+          "$ref": "#/definitions/target",
+          "description": "Objetivo del trigger"
+        }
+      },
+      "required": ["type"]
+    },
+    "condition": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "card_type",
+            "race",
+            "cost",
+            "force",
+            "controller",
+            "in_zone",
+            "has_ability",
+            "count",
+            "and",
+            "or",
+            "not"
+          ]
+        },
+        "value": {},
+        "operator": {
+          "type": "string",
+          "enum": ["==", "!=", ">", "<", ">=", "<=", "in", "not_in"]
+        }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "modify_force",
+            "draw_cards",
+            "search",
+            "destroy",
+            "exile",
+            "discard",
+            "shuffle",
+            "put_in_hand",
+            "put_in_play",
+            "lose_ability",
+            "gain_ability",
+            "counter",
+            "damage",
+            "heal",
+            "tap",
+            "untap",
+            "move_zone",
+            "modify_cost",
+            "prevent_damage",
+            "copy_ability"
+          ],
+          "description": "Tipo de efecto"
+        },
+        "target": {
+          "$ref": "#/definitions/target",
+          "description": "Objetivo del efecto"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Cantidad (para efectos numéricos)"
+        },
+        "value": {},
+        "modifier": {
+          "$ref": "#/definitions/modifier",
+          "description": "Modificador (para modify_force)"
+        },
+        "location": {
+          "type": "string",
+          "enum": ["deck", "hand", "graveyard", "exile", "play", "support_line", "defense_line"],
+          "description": "Ubicación (para search, move_zone)"
+        },
+        "action": {
+          "type": "string",
+          "enum": ["put_in_hand", "put_in_play", "shuffle", "exile", "destroy"],
+          "description": "Acción a realizar (para search)"
+        }
+      },
+      "required": ["type"]
+    },
+    "target": {
+      "oneOf": [
+        {
+          "type": "string",
+          "enum": ["self", "controller", "opponent", "all", "triggered_card", "attacked_card", "blocked_card"]
+        },
+        {
+          "$ref": "#/definitions/filter"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "type": {
+              "type": "string",
+              "enum": ["reference"],
+              "description": "Referencia a otro valor"
+            },
+            "reference": {
+              "type": "string",
+              "description": "Ruta de referencia (ej: triggered_card.cost)"
+            }
+          },
+          "required": ["type", "reference"]
+        }
+      ]
+    },
+    "filter": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["allies", "talismans", "oros", "totems", "armas", "cards"],
+          "description": "Tipo de carta a filtrar"
+        },
+        "race": {
+          "type": "string",
+          "description": "Raza específica"
+        },
+        "controller": {
+          "type": "string",
+          "enum": ["self", "opponent", "any"],
+          "description": "Controlador"
+        },
+        "cost": {
+          "$ref": "#/definitions/numeric_condition"
+        },
+        "force": {
+          "$ref": "#/definitions/numeric_condition"
+        },
+        "zone": {
+          "type": "string",
+          "enum": ["hand", "deck", "graveyard", "play", "support_line", "defense_line", "exile"]
+        }
+      }
+    },
+    "numeric_condition": {
+      "type": "object",
+      "properties": {
+        "operator": {
+          "type": "string",
+          "enum": ["==", "!=", ">", "<", ">=", "<="]
+        },
+        "value": {
+          "oneOf": [
+            {"type": "number"},
+            {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string", "enum": ["reference"]},
+                "reference": {"type": "string"}
+              },
+              "required": ["type", "reference"]
+            }
+          ]
+        }
+      },
+      "required": ["operator", "value"]
+    },
+    "modifier": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["add", "subtract", "multiply", "divide", "set"],
+          "description": "Tipo de modificación"
+        },
+        "value": {
+          "oneOf": [
+            {"type": "number"},
+            {
+              "type": "object",
+              "properties": {
+                "type": {"type": "string", "enum": ["reference"]},
+                "reference": {"type": "string"}
+              },
+              "required": ["type", "reference"]
+            }
+          ]
+        }
+      },
+      "required": ["type", "value"]
+    },
+    "cost": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": [
+            "pay_resources",
+            "discard",
+            "destroy",
+            "exile",
+            "tap",
+            "sacrifice"
+          ],
+          "description": "Tipo de costo"
+        },
+        "amount": {
+          "type": "number",
+          "description": "Cantidad (para pay_resources)"
+        },
+        "target": {
+          "$ref": "#/definitions/target",
+          "description": "Objetivo (para discard, destroy, exile, sacrifice)"
+        }
+      },
+      "required": ["type"]
+    }
+  }
+}
+
+
+
+

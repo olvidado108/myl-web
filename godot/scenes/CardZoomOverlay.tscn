@@ -1,0 +1,77 @@
+[gd_scene load_steps=1 format=3 uid="uid://zoom"]
+
+[node name="CardZoomOverlay" type="Control"]
+groups=["card_zoom_overlay"]
+visible = false
+custom_minimum_size = Vector2(320, 480)
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+modulate = Color(1, 1, 1, 0.92)
+mouse_filter = 2
+top_level = true
+z_index = 1000
+
+[node name="Texture" type="TextureRect" parent="."]
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -72.0
+offset_top = 40.0
+offset_right = 72.0
+offset_bottom = 286.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+stretch_mode = 5
+
+[node name="Title" type="Label" parent="."]
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -90.0
+offset_top = 10.0
+offset_right = 90.0
+offset_bottom = 30.0
+size_flags_horizontal = 3
+text = "Nombre"
+horizontal_alignment = 1
+
+[node name="Stats" type="Label" parent="."]
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -90.0
+offset_top = 300.0
+offset_right = 90.0
+offset_bottom = 320.0
+size_flags_horizontal = 3
+text = "Coste / Fuerza"
+horizontal_alignment = 1
+
+[node name="Body" type="RichTextLabel" parent="."]
+layout_mode = 0
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.0
+anchor_right = 0.5
+anchor_bottom = 0.0
+offset_left = -110.0
+offset_top = 330.0
+offset_right = 110.0
+offset_bottom = 440.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+text = "Texto / habilidades"

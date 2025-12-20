@@ -1,0 +1,330 @@
+{
+  "version": "1.0",
+  "examples": [
+    {
+      "cardName": "Mago Arcano",
+      "textoHabilidad": "Al entrar al campo, roba 1 carta",
+      "abilities": [
+        {
+          "id": "draw_on_enter",
+          "type": "triggered",
+          "trigger": {
+            "type": "enters_play",
+            "target": "self"
+          },
+          "effect": {
+            "type": "draw_cards",
+            "amount": 1,
+            "target": "controller"
+          },
+          "text": "Al entrar al campo, roba 1 carta"
+        }
+      ]
+    },
+    {
+      "cardName": "Rey Arturo Pendragon",
+      "textoHabilidad": "Solo puedes tener en juego a un Rey Arturo Pendragón. Mientras está en juego, tus Caballeros ganan + 1 a la fuerza y tu oponente bota 2 cartas en cada fase de agrupación. En respuesta a que sea destruido, puedes descartar 2 para salvarlo.",
+      "abilities": [
+        {
+          "id": "unique_restriction",
+          "type": "static",
+          "effect": {
+            "type": "restriction",
+            "restriction": "unique",
+            "target": "self"
+          },
+          "text": "Solo puedes tener en juego a un Rey Arturo Pendragón"
+        },
+        {
+          "id": "boost_knights",
+          "type": "static",
+          "effect": {
+            "type": "modify_force",
+            "target": {
+              "type": "filter",
+              "filter": {
+                "type": "allies",
+                "race": "Caballero",
+                "controller": "self"
+              }
+            },
+            "modifier": {
+              "type": "add",
+              "value": 1
+            }
+          },
+          "text": "Mientras está en juego, tus Caballeros ganan + 1 a la fuerza"
+        },
+        {
+          "id": "opponent_discard",
+          "type": "triggered",
+          "trigger": {
+            "type": "phase_start",
+            "target": {
+              "type": "reference",
+              "reference": "phase.agrupacion"
+            }
+          },
+          "effect": {
+            "type": "discard",
+            "target": "opponent",
+            "amount": 2,
+            "location": "deck"
+          },
+          "text": "Tu oponente bota 2 cartas en cada fase de agrupación"
+        },
+        {
+          "id": "save_on_destroy",
+          "type": "response",
+          "trigger": {
+            "type": "destroyed",
+            "target": "self"
+          },
+          "cost": {
+            "type": "discard",
+            "amount": 2,
+            "target": "controller"
+          },
+          "effect": {
+            "type": "prevent_damage",
+            "target": "self"
+          },
+          "optional": true,
+          "text": "En respuesta a que sea destruido, puedes descartar 2 para salvarlo"
+        }
+      ]
+    },
+    {
+      "cardName": "Espada Larga",
+      "textoHabilidad": "Cuando Espada Larga entra en juego, roba dos cartas de tu Mazo Castillo. El portador de Espada Larga gana 1 a la fuerza.",
+      "abilities": [
+        {
+          "id": "draw_on_enter",
+          "type": "triggered",
+          "trigger": {
+            "type": "enters_play",
+            "target": "self"
+          },
+          "effect": {
+            "type": "draw_cards",
+            "amount": 2,
+            "target": "controller"
+          },
+          "text": "Cuando Espada Larga entra en juego, roba dos cartas"
+        },
+        {
+          "id": "boost_equipped",
+          "type": "static",
+          "effect": {
+            "type": "modify_force",
+            "target": {
+              "type": "reference",
+              "reference": "equipped_to"
+            },
+            "modifier": {
+              "type": "add",
+              "value": 1
+            }
+          },
+          "text": "El portador de Espada Larga gana 1 a la fuerza"
+        }
+      ]
+    },
+    {
+      "cardName": "Cacería Infernal",
+      "textoHabilidad": "En respuesta a que un Aliado que controles salga del juego por un efecto oponente, juega Cacería Infernal para buscar un Aliado de igual o menor coste en tu Mazo Castillo y ponerlo en tu Mano.",
+      "abilities": [
+        {
+          "id": "search_on_ally_removed",
+          "type": "response",
+          "trigger": {
+            "type": "leaves_play",
+            "target": {
+              "type": "filter",
+              "filter": {
+                "type": "allies",
+                "controller": "self",
+                "removedBy": "opponent"
+              }
+            }
+          },
+          "effect": {
+            "type": "search",
+            "location": "deck",
+            "target": {
+              "type": "filter",
+              "filter": {
+                "type": "allies",
+                "controller": "self",
+                "cost": {
+                  "operator": "<=",
+                  "value": {
+                    "type": "reference",
+                    "reference": "triggered_card.cost"
+                  }
+                }
+              }
+            },
+            "action": "put_in_hand"
+          },
+          "text": "En respuesta a que un Aliado que controles salga del juego por un efecto oponente, busca un Aliado de igual o menor coste"
+        }
+      ]
+    },
+    {
+      "cardName": "Dragon Demonio",
+      "textoHabilidad": "Dragón Demonio debe atacar cuando entra en juego. No puede ser afectado por Talismanes. Al final de este turno, destiérralo. Carta única.",
+      "abilities": [
+        {
+          "id": "must_attack",
+          "type": "static",
+          "effect": {
+            "type": "restriction",
+            "restriction": "must_attack_on_enter",
+            "target": "self"
+          },
+          "text": "Debe atacar cuando entra en juego"
+        },
+        {
+          "id": "immune_to_talismans",
+          "type": "static",
+          "effect": {
+            "type": "immunity",
+            "target": "self",
+            "immuneTo": {
+              "type": "filter",
+              "filter": {
+                "type": "talismans"
+              }
+            }
+          },
+          "text": "No puede ser afectado por Talismanes"
+        },
+        {
+          "id": "exile_end_turn",
+          "type": "triggered",
+          "trigger": {
+            "type": "turn_end",
+            "target": "self"
+          },
+          "effect": {
+            "type": "exile",
+            "target": "self"
+          },
+          "text": "Al final de este turno, destiérralo"
+        },
+        {
+          "id": "unique",
+          "type": "static",
+          "effect": {
+            "type": "restriction",
+            "restriction": "unique",
+            "target": "self"
+          },
+          "text": "Carta única"
+        }
+      ]
+    },
+    {
+      "cardName": "Fe Sin Limite",
+      "textoHabilidad": "Anula un Talismán.",
+      "abilities": [
+        {
+          "id": "counter_talisman",
+          "type": "activated",
+          "cost": {
+            "type": "pay_resources",
+            "amount": {
+              "type": "reference",
+              "reference": "card.cost"
+            }
+          },
+          "effect": {
+            "type": "counter",
+            "target": {
+              "type": "filter",
+              "filter": {
+                "type": "talismans"
+              }
+            }
+          },
+          "text": "Anula un Talismán"
+        }
+      ]
+    },
+    {
+      "cardName": "Excalibur",
+      "textoHabilidad": "Sólo puede ser portada por Rey Arturo Pendragón. Gana + 3 a la fuerza. En tu fase de vigilia y una vez por turno, puedes descartar 1 para que gane un bono de fuerza igual al coste en oro de la carta descartada.",
+      "abilities": [
+        {
+          "id": "restriction_carrier",
+          "type": "static",
+          "effect": {
+            "type": "restriction",
+            "restriction": "equip_only_to",
+            "target": "self",
+            "value": {
+              "type": "filter",
+              "filter": {
+                "type": "allies",
+                "name": "Rey Arturo Pendragón"
+              }
+            }
+          },
+          "text": "Sólo puede ser portada por Rey Arturo Pendragón"
+        },
+        {
+          "id": "boost_force",
+          "type": "static",
+          "effect": {
+            "type": "modify_force",
+            "target": {
+              "type": "reference",
+              "reference": "equipped_to"
+            },
+            "modifier": {
+              "type": "add",
+              "value": 3
+            }
+          },
+          "text": "Gana + 3 a la fuerza"
+        },
+        {
+          "id": "discard_for_boost",
+          "type": "activated",
+          "condition": {
+            "type": "phase",
+            "value": "vigilia",
+            "controller": "self"
+          },
+          "cost": {
+            "type": "discard",
+            "amount": 1,
+            "target": "controller"
+          },
+          "effect": {
+            "type": "modify_force",
+            "target": {
+              "type": "reference",
+              "reference": "equipped_to"
+            },
+            "modifier": {
+              "type": "add",
+              "value": {
+                "type": "reference",
+                "reference": "discarded_card.cost"
+              }
+            }
+          },
+          "optional": true,
+          "oncePerTurn": true,
+          "text": "En tu fase de vigilia y una vez por turno, puedes descartar 1 para que gane un bono de fuerza igual al coste en oro de la carta descartada"
+        }
+      ]
+    }
+  ]
+}
+
+
+
+

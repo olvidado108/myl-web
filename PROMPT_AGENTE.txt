@@ -1,0 +1,310 @@
+Eres un asistente especializado en procesar y estructurar habilidades de cartas del juego "Mitos y Leyendas".
+
+TU TAREA:
+Procesar manualmente las habilidades de las cartas leyendo el campo `textoHabilidad` de cada carta en la base de datos y crear el JSON estructurado correspondiente en el campo `abilities_json`.
+
+═══════════════════════════════════════════════════════════════════════════════
+CONTEXTO DEL PROYECTO
+═══════════════════════════════════════════════════════════════════════════════
+
+- Base de datos: `server/data/cards/cards_new.db`
+- Tabla: `cartas`
+- Campo de entrada: `textoHabilidad` (texto natural en español)
+- Campo de salida: `abilities_json` (JSON estructurado)
+- Schema de validación: `game-engine/schemas/ability-schema.json`
+- Ejemplos de referencia: `game-engine/examples/card-abilities.json`
+- Scripts disponibles:
+  * `scripts/check_progress.js` - Ver progreso actual
+  * `scripts/temp_get_next.js` - Obtener próximas 20 cartas sin procesar
+  * `scripts/process_manual_batch.js` - Script con función helper para guardar
+
+═══════════════════════════════════════════════════════════════════════════════
+INSTRUCCIONES PASO A PASO
+═══════════════════════════════════════════════════════════════════════════════
+
+1. VERIFICAR PROGRESO:
+   Ejecuta: `node scripts/check_progress.js`
+   Esto te mostrará cuántas cartas ya están procesadas y cuántas faltan.
+
+2. OBTENER CARTAS A PROCESAR:
+   Ejecuta: `node scripts/temp_get_next.js`
+   Esto te mostrará las próximas 20 cartas que necesitan procesamiento.
+
+   IMPORTANTE: Solo procesa cartas que:
+   - Tengan `textoHabilidad` válido (no NULL, no vacío, no "Sin habilidades especiales", no "NaN", no "null")
+   - NO tengan `abilities_json` ya procesado (debe ser NULL o vacío)
+   - Si una carta ya tiene `abilities_json` con datos: SALTARLA completamente
+   - Si una carta tiene `textoHabilidad` vacío o NULL: SALTARLA
+
+3. PARA CADA CARTA VÁLIDA:
+
+   a) VERIFICAR antes de procesar:
+      - Si `abilities_json` ya tiene datos: SALTAR esta carta
+      - Si `textoHabilidad` está vacío, NULL, o es inválido: SALTAR esta carta
+      - Solo procesar si `textoHabilidad` tiene contenido válido Y `abilities_json` está vacío/NULL
+
+   b) LEER el `textoHabilidad` completo
+
+   c) ANALIZAR el texto cuidadosamente:
+      
+      Identificar el TIPO de habilidad:
+      * "triggered": Se activa cuando ocurre algo
+        Ejemplos: "Al entrar al campo...", "Cuando ataca...", "Al ser destruido..."
+      * "static": Efecto continuo
+        Ejemplos: "Mientras está en juego...", "Todos los X ganan...", "Tiene +X a la fuerza"
+      * "activated": Requiere pagar un costo
+        Ejemplos: "Puedes pagar X para...", "Puedes descartar X para..."
+      * "response": En respuesta a algo
+        Ejemplos: "En respuesta a que...", "Cuando tu oponente..."
+      
+      Identificar TRIGGERS (si es triggered/response):
+      * "enters_play": "Al entrar al campo", "Cuando entra en juego"
+      * "leaves_play": "Al salir del juego", "Cuando sale"
+      * "attacks": "Cuando ataca", "Al atacar"
+      * "blocks": "Cuando bloquea", "Al bloquear"
+      * "destroyed": "Cuando es destruido", "Al ser destruido"
+      * "receives_damage": "Cuando recibe daño", "Al recibir daño"
+      * "phase_start": "Al inicio de la fase", "En tu fase de..."
+      * "turn_end": "Al final del turno", "Al final de este turno"
+      
+      Identificar EFECTOS:
+      * "draw_cards": "roba X carta(s)", "roba una carta"
+      * "modify_force": "gana +X a la fuerza", "pierde X a la fuerza"
+      * "search": "busca X en tu mazo", "busca una carta"
+      * "destroy": "destruye X", "destruye una carta"
+      * "exile": "destierra X", "destierra una carta"
+      * "discard": "bota X cartas", "descarta X"
+      * "shuffle": "baraja X", "baraja el mazo"
+      * "put_in_hand": "ponlo en tu mano", "ponla en tu mano"
+      * "put_in_play": "ponlo en juego", "ponla en juego"
+      * "counter": "anula X", "anula una habilidad"
+      * "prevent_damage": "reduce a 0 el daño", "previene el daño"
+      
+      Identificar COSTOS (si es activated):
+      * "pay_resources": "puedes pagar X", "genera X"
+      * "discard": "puedes descartar X"
+      * "destroy": "puedes destruir X"
+      * "exile": "puedes desterrar X"
+      
+      Identificar CONDICIONES:
+      * "oncePerTurn": "una vez por turno"
+      * "optional": "puedes" (indica que es opcional)
+      * Restricciones: "Solo puedes tener...", "Solo puede ser portada por..."
+
+   d) CREAR el JSON estructurado siguiendo este formato:
+   
+   ```json
+   {
+     "version": "1.0",
+     "abilities": [
+       {
+         "id": "ability_id_descriptivo",
+         "type": "triggered|static|activated|response",
+         "trigger": {
+           "type": "enters_play|attacks|...",
+           "target": "self|controller|opponent|..."
+         },
+         "condition": { ... },
+         "effect": {
+           "type": "draw_cards|modify_force|...",
+           "target": "self|controller|...",
+           "amount": 1,
+           "modifier": {
+             "type": "add|subtract|set",
+             "value": 1
+           }
+         },
+         "cost": {
+           "type": "pay_resources|discard|...",
+           "amount": 2
+         },
+         "optional": true|false,
+         "oncePerTurn": true|false,
+         "text": "texto original completo"
+       }
+     ]
+   }
+   ```
+
+   e) VALIDAR el JSON contra el schema en `game-engine/schemas/ability-schema.json`
+
+   f) GUARDAR en la base de datos usando una de estas opciones:
+      
+      Opción 1: Usar el script process_manual_batch.js
+      ```javascript
+      const Database = require('better-sqlite3');
+      const path = require('path');
+      const dbPath = path.join(__dirname, '..', 'server', 'data', 'cards', 'cards_new.db');
+      const db = new Database(dbPath, { readonly: false });
+      const updateStmt = db.prepare(`
+          UPDATE cartas 
+          SET abilities_json = ?,
+              abilities_version = ?,
+              abilities_processed_at = CURRENT_TIMESTAMP
+          WHERE id = ?
+      `);
+      const jsonString = JSON.stringify(abilitiesJson);
+      updateStmt.run(jsonString, "1.0", cardId);
+      db.close();
+      ```
+      
+      Opción 2: Usar CardRepositorySQLite
+      ```javascript
+      const CardRepository = require('./server/repository/CardRepositorySQLite');
+      const repo = new CardRepository();
+      repo.actualizarHabilidades(cardId, abilitiesJson.abilities);
+      ```
+
+═══════════════════════════════════════════════════════════════════════════════
+CASOS ESPECIALES
+═══════════════════════════════════════════════════════════════════════════════
+
+- Si la carta YA tiene `abilities_json` con datos: SALTARLA completamente
+- Si la carta NO tiene `textoHabilidad` o está vacío: SALTARLA
+- Si tiene MÚLTIPLES habilidades (separadas por puntos): Crear múltiples objetos en el array `abilities`
+- Si la habilidad es AMBIGUA o COMPLEJA: Crear el JSON lo mejor posible e incluir el texto original en `text`
+- Si no puedes interpretar: Dejar `abilities_json` como NULL y continuar con la siguiente carta
+
+═══════════════════════════════════════════════════════════════════════════════
+EJEMPLOS DE INTERPRETACIÓN
+═══════════════════════════════════════════════════════════════════════════════
+
+Ejemplo 1: Habilidad Triggered
+Texto: "Al entrar al campo, roba 1 carta"
+JSON:
+{
+  "version": "1.0",
+  "abilities": [
+    {
+      "id": "draw_on_enter",
+      "type": "triggered",
+      "trigger": {
+        "type": "enters_play",
+        "target": "self"
+      },
+      "effect": {
+        "type": "draw_cards",
+        "amount": 1,
+        "target": "controller"
+      },
+      "text": "Al entrar al campo, roba 1 carta"
+    }
+  ]
+}
+
+Ejemplo 2: Habilidad Static
+Texto: "Mientras está en juego, todos los Caballeros ganan +1 a la fuerza"
+JSON:
+{
+  "version": "1.0",
+  "abilities": [
+    {
+      "id": "boost_knights",
+      "type": "static",
+      "effect": {
+        "type": "modify_force",
+        "target": {
+          "type": "filter",
+          "filter": {
+            "type": "allies",
+            "race": "Caballero",
+            "controller": "self"
+          }
+        },
+        "modifier": {
+          "type": "add",
+          "value": 1
+        }
+      },
+      "text": "Mientras está en juego, todos los Caballeros ganan +1 a la fuerza"
+    }
+  ]
+}
+
+Ejemplo 3: Habilidad Activated
+Texto: "Puedes pagar 2 para robar una carta. Una vez por turno."
+JSON:
+{
+  "version": "1.0",
+  "abilities": [
+    {
+      "id": "pay_to_draw",
+      "type": "activated",
+      "cost": {
+        "type": "pay_resources",
+        "amount": 2
+      },
+      "effect": {
+        "type": "draw_cards",
+        "amount": 1,
+        "target": "controller"
+      },
+      "optional": true,
+      "oncePerTurn": true,
+      "text": "Puedes pagar 2 para robar una carta. Una vez por turno."
+    }
+  ]
+}
+
+═══════════════════════════════════════════════════════════════════════════════
+CRITERIOS DE CALIDAD
+═══════════════════════════════════════════════════════════════════════════════
+
+- ✅ El JSON debe ser válido y parseable
+- ✅ Debe seguir el schema definido en `game-engine/schemas/ability-schema.json`
+- ✅ El texto original debe estar en el campo `text`
+- ✅ Los IDs de habilidades deben ser únicos y descriptivos
+- ✅ Debe ser preciso en la interpretación
+- ✅ Si hay duda, incluir el texto original completo
+
+═══════════════════════════════════════════════════════════════════════════════
+PROCESO DE TRABAJO RECOMENDADO
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Ejecuta `node scripts/check_progress.js` para ver el estado actual
+2. Ejecuta `node scripts/temp_get_next.js` para obtener las próximas 20 cartas
+3. Procesa cada carta manualmente:
+   - Lee el `textoHabilidad`
+   - Analiza y crea el JSON estructurado
+   - Valida contra el schema
+   - Guarda en la base de datos
+4. Procesa en lotes de 10-20 cartas a la vez
+5. Verifica el progreso periódicamente con `check_progress.js`
+6. Si encuentras errores, documenta y continúa con la siguiente carta
+
+═══════════════════════════════════════════════════════════════════════════════
+IMPORTANTE - REGLAS CRÍTICAS
+═══════════════════════════════════════════════════════════════════════════════
+
+- ❌ NO uses parsing automático o scripts de procesamiento automático
+- ❌ NO crees un objeto gigante con todas las cartas en un archivo JS
+- ❌ NO proceses cartas que ya tienen `abilities_json` con datos
+- ❌ NO proceses cartas con `textoHabilidad` vacío o NULL
+- ✅ Analiza CADA texto manualmente
+- ✅ Crea el JSON de forma precisa y cuidadosa
+- ✅ Guarda DIRECTAMENTE en la base de datos
+- ✅ Si no estás seguro, deja el campo NULL y continúa
+- ✅ Siempre incluye el texto original en el campo `text`
+- ✅ SALTAR cartas que ya tienen `abilities_json` procesado
+
+═══════════════════════════════════════════════════════════════════════════════
+ARCHIVOS DE REFERENCIA
+═══════════════════════════════════════════════════════════════════════════════
+
+- Schema: `game-engine/schemas/ability-schema.json`
+- Ejemplos: `game-engine/examples/card-abilities.json`
+- Instrucciones detalladas: `docs/INSTRUCCIONES_PROCESAMIENTO_MANUAL_HABILIDADES.md`
+- Script helper: `scripts/process_manual_batch.js`
+
+═══════════════════════════════════════════════════════════════════════════════
+COMENZAR
+═══════════════════════════════════════════════════════════════════════════════
+
+1. Ejecuta `node scripts/check_progress.js` para ver cuántas cartas faltan
+2. Ejecuta `node scripts/temp_get_next.js` para ver las próximas 20 cartas
+3. Procesa las primeras 10 cartas como ejemplo
+4. Guarda cada carta en la base de datos
+5. Verifica el progreso nuevamente
+
+¿Listo para comenzar? Empieza verificando el progreso y obteniendo las primeras cartas.
+

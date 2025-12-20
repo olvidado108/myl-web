@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cartas Sin Habilidad - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="cards.css">
+    <style>
+        .missing-abilities-header {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+        }
+        
+        .missing-abilities-header h1 {
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+        }
+        
+        .missing-abilities-header .subtitle {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+        
+        .quick-edit-card {
+            border: 2px solid #ff6b6b;
+            border-left: 5px solid #ff6b6b;
+            background: #fff5f5;
+        }
+        
+        .quick-edit-form {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 2px solid #e9ecef;
+        }
+        
+        .quick-edit-form textarea {
+            width: 100%;
+            min-height: 100px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        
+        .quick-edit-form textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+        
+        .quick-edit-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn-save-ability {
+            background: #28a745;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn-save-ability:hover {
+            background: #218838;
+        }
+        
+        .btn-skip {
+            background: #6c757d;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn-skip:hover {
+            background: #5a6268;
+        }
+        
+        .stats-highlight {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            padding: 15px;
+            border-radius: 8px;
+            font-weight: 600;
+            color: #856404;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .back-link:hover {
+            color: #5568d3;
+        }
+        
+        .counter-badge {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            text-align: center;
+            font-size: 2em;
+            font-weight: 700;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(255, 107, 107, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .counter-badge .counter-number {
+            font-size: 1.5em;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 8px;
+            min-width: 80px;
+            display: inline-block;
+        }
+        
+        .counter-badge .counter-text {
+            font-size: 0.9em;
+        }
+        
+        .modal-image-with-form {
+            max-width: 95%;
+            width: 1400px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            max-height: 90vh;
+            padding: 0;
+        }
+        
+        .modal-image-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 8px 0 0 8px;
+            overflow-y: auto;
+        }
+        
+        .modal-image-section img {
+            max-width: 100%;
+            max-height: 75vh;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+        
+        .modal-form-section {
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 90vh;
+            background: white;
+        }
+        
+        .modal-form-section h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5em;
+        }
+        
+        .modal-form-section label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 1.1em;
+        }
+        
+        .modal-form-section textarea {
+            width: 100%;
+            min-height: 200px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+            margin-bottom: 15px;
+        }
+        
+        .modal-form-section textarea:focus {
+            outline: none;
+            border-color: #ff6b6b;
+        }
+        
+        .modal-form-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+            padding: 8px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.3s;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+        }
+        
+        .card-info-modal {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .card-info-modal-item {
+            margin: 5px 0;
+            font-size: 0.95em;
+            color: #6c757d;
+        }
+        
+        @media (max-width: 1200px) {
+            .modal-image-with-form {
+                grid-template-columns: 1fr;
+                width: 95%;
+            }
+            
+            .modal-image-section img {
+                max-height: 50vh;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/cards" class="back-link">← Volver a Gestión de Cartas</a>
+        
+        <div class="missing-abilities-header">
+            <h1>📝 Cartas Sin Habilidad</h1>
+            <p class="subtitle">Completa las habilidades faltantes en tu colección</p>
+        </div>
+
+        <!-- Contador destacado -->
+        <div class="counter-badge" id="counterBadge">
+            <span class="counter-text">Faltan</span>
+            <span class="counter-number" id="counterNumber">-</span>
+            <span class="counter-text">cartas</span>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-bar" id="statsBar">
+            <div class="stats-highlight">
+                <span id="statsText">Cargando estadísticas...</span>
+            </div>
+        </div>
+
+        <!-- Lista de cartas -->
+        <div class="cards-grid" id="cardsGrid">
+            <div class="loading">Cargando cartas sin habilidad...</div>
+        </div>
+    </div>
+
+    <script src="missing-abilities.js"></script>
+</body>
+</html>
+

@@ -7,7 +7,7 @@ Juego de cartas coleccionable (TCG) para navegador web, inspirado en "Mitos y Le
 **Fase Actual:** Fase 0 ✅ Completada  
 **Próxima Fase:** Fase 1 - Prototipo Jugable en Consola
 
-👉 **Ver [PROGRESS.md](./PROGRESS.md) para el estado detallado del proyecto**
+👉 **Ver [docs/PROGRESS.md](./docs/PROGRESS.md) para el estado detallado del proyecto**
 
 ## Estructura del Proyecto
 
@@ -46,11 +46,16 @@ http://localhost:3000
 
 ## 📚 Documentación del Proyecto
 
-- **[PROGRESS.md](./PROGRESS.md)** - Estado actual, fases completadas y pendientes
-- **[ROADMAP.md](./ROADMAP.md)** - Plan detallado de desarrollo por fases
-- **[CHANGELOG.md](./CHANGELOG.md)** - Historial de cambios importantes
-- **[BUGS.md](./BUGS.md)** - Registro de bugs conocidos y resueltos
-- **[IMPROVEMENTS.md](./IMPROVEMENTS.md)** - Mejoras sugeridas e ideas futuras
+**📁 Toda la documentación está en la carpeta [`docs/`](./docs/)**
+
+👉 **Ver [DOCUMENTATION.md](./DOCUMENTATION.md) para el índice completo de documentación**
+
+### Documentos Principales:
+- **[docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md)** - ⭐ **Arquitectura y principios** (LEER PRIMERO)
+- **[docs/GAME_RULES.md](./docs/GAME_RULES.md)** - ⭐ **Reglas oficiales del juego** (LEER PRIMERO)
+- **[docs/DECK_CONSTRUCTION_RULES.md](./docs/DECK_CONSTRUCTION_RULES.md)** - ⭐ **Reglas de construcción de mazos** (OBLIGATORIO)
+- **[docs/PROGRESS.md](./docs/PROGRESS.md)** - Estado actual, fases completadas y pendientes
+- **[docs/ROADMAP.md](./docs/ROADMAP.md)** - Plan detallado de desarrollo por fases
 
 ## 🌿 Estrategia de Ramas Git
 
@@ -67,6 +72,25 @@ El proyecto usa un sistema de ramas por fase para mantener control sobre las imp
 3. Revisar y probar
 4. Hacer merge a `main` cuando esté completa y estable
 
+## ✅ Verificación del Proyecto
+
+Antes de comenzar a trabajar, puedes verificar que todo está configurado correctamente:
+
+```bash
+npm test
+```
+
+Esto ejecutará verificaciones de:
+- Modelos de datos (Card, GameState)
+- Utilidades del juego
+- Mazo de demostración
+- Integración de componentes
+
+También puedes ver un ejemplo de uso:
+```bash
+node server/test/example-usage.js
+```
+
 ## 🚀 Próximos Pasos (Fase 1)
 
 - Implementar lógica básica del juego en consola
@@ -74,7 +98,7 @@ El proyecto usa un sistema de ramas por fase para mantener control sobre las imp
 - Bucle de juego por turnos
 - IA básica para oponente automático
 
-Ver [ROADMAP.md](./ROADMAP.md) para el plan completo.
+Ver [docs/ROADMAP.md](./docs/ROADMAP.md) para el plan completo.
 
 ## ⚖️ Nota Legal
 

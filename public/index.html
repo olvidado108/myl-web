@@ -4,55 +4,33 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mitos y Leyendas - Clon Web</title>
+    <meta http-equiv="refresh" content="0; url=/home.html">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
             color: white;
-            overflow: hidden;
-        }
-        
-        #game-container {
-            width: 100vw;
-            height: 100vh;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
+            margin: 0;
         }
-        
-        #game-canvas {
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 8px;
-            background: #0a1929;
-        }
-        
-        #info-panel {
-            margin-top: 20px;
-            padding: 15px;
-            background: rgba(0, 0, 0, 0.5);
-            border-radius: 8px;
+        .redirect-message {
             text-align: center;
         }
     </style>
 </head>
 <body>
-    <div id="game-container">
-        <canvas id="game-canvas"></canvas>
-        <div id="info-panel">
-            <h2>Mitos y Leyendas - Clon Web</h2>
-            <p>Fase 0: Preparación y Arquitectura</p>
-            <p>Servidor conectado correctamente</p>
-        </div>
+    <div class="redirect-message">
+        <img src="images/logo.webp" alt="Mitos y Leyendas Logo" style="height: 100px; width: auto; margin-bottom: 20px;">
+        <h2>Mitos y Leyendas</h2>
+        <p>Redirigiendo...</p>
     </div>
-    
-    <script src="/client.js"></script>
+    <script>
+        // Redirección inmediata por JavaScript también
+        window.location.href = '/home.html';
+    </script>
 </body>
 </html>
 

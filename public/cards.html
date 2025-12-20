@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Cartas - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="cards.css">
+    <link rel="stylesheet" href="css/navbar.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="navbar-container" id="navbar-container">
+            <!-- Se llenará dinámicamente -->
+        </div>
+    </nav>
+    <div class="container">
+        <header>
+            <h1>🃏 Gestión de Cartas</h1>
+            <p class="subtitle">Administra tu colección de cartas</p>
+        </header>
+
+        <!-- Barra de búsqueda y filtros -->
+        <div class="search-section">
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Buscar por nombre..." />
+                <button id="searchBtn" class="btn btn-primary">🔍 Buscar</button>
+                <button id="clearSearchBtn" class="btn btn-secondary">Limpiar</button>
+            </div>
+            
+            <div class="filters">
+                <select id="filterEdicion" class="filter-select">
+                    <option value="">Todas las ediciones</option>
+                </select>
+                
+                <select id="filterRaza" class="filter-select">
+                    <option value="">Todas las razas</option>
+                </select>
+                
+                <select id="filterTipo" class="filter-select">
+                    <option value="">Todos los tipos</option>
+                    <option value="Aliado">Aliado</option>
+                    <option value="Talisman">Talisman</option>
+                    <option value="Oro">Oro</option>
+                    <option value="Totem">Totem</option>
+                    <option value="Arma">Arma</option>
+                </select>
+                
+                <button id="newCardBtn" class="btn btn-success">➕ Nueva Carta</button>
+            </div>
+        </div>
+
+        <!-- Estadísticas -->
+        <div class="stats-bar" id="statsBar">
+            <span>Cargando estadísticas...</span>
+        </div>
+
+        <!-- Lista de cartas -->
+        <div class="cards-grid" id="cardsGrid">
+            <div class="loading">Cargando cartas...</div>
+        </div>
+
+        <!-- Modal para crear/editar carta -->
+        <div id="cardModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="modalTitle">Nueva Carta</h2>
+                    <span class="close" id="closeModal">&times;</span>
+                </div>
+                <form id="cardForm">
+                    <input type="hidden" id="cardId" />
+                    
+                    <div class="form-group">
+                        <label for="cardNombre">Nombre *</label>
+                        <input type="text" id="cardNombre" required />
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="cardTipo">Tipo *</label>
+                            <select id="cardTipo" required>
+                                <option value="">Seleccione...</option>
+                                <option value="Aliado">Aliado</option>
+                                <option value="Talisman">Talisman</option>
+                                <option value="Oro">Oro</option>
+                                <option value="Totem">Totem</option>
+                                <option value="Arma">Arma</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="cardCoste">Coste</label>
+                            <input type="number" id="cardCoste" min="0" value="0" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-row" id="combatStats" style="display: none;">
+                        <div class="form-group">
+                            <label for="cardFuerza">Fuerza</label>
+                            <input type="number" id="cardFuerza" min="0" value="0" />
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cardRaza">Raza</label>
+                        <input type="text" id="cardRaza" placeholder="Ej: Caballero, Dragón, etc." />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cardEdicion">Edición</label>
+                        <input type="text" id="cardEdicion" placeholder="Ej: Espada Sagrada, Helénica, etc." />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cardRareza">Rareza</label>
+                        <select id="cardRareza">
+                            <option value="">Seleccione...</option>
+                            <option value="Común">Común</option>
+                            <option value="Real">Real</option>
+                            <option value="Épica">Épica</option>
+                            <option value="Legendaria">Legendaria</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cardTextoHabilidad">Texto de Habilidad</label>
+                        <textarea id="cardTextoHabilidad" rows="4" placeholder="Describe las habilidades de la carta..."></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="cardImagen">Ruta de Imagen</label>
+                        <input type="text" id="cardImagen" placeholder="ruta/a/imagen.png" />
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="cardEsUnica" />
+                            Es única (máximo 1 copia en mazo)
+                        </label>
+                    </div>
+                    
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal de confirmación para eliminar -->
+        <div id="deleteModal" class="modal">
+            <div class="modal-content modal-small">
+                <div class="modal-header">
+                    <h2>Confirmar Eliminación</h2>
+                </div>
+                <div class="modal-body">
+                    <p>¿Estás seguro de que deseas eliminar la carta <strong id="deleteCardName"></strong>?</p>
+                    <p class="warning">Esta acción no se puede deshacer.</p>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelDeleteBtn">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Eliminar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal para imagen grande -->
+        <div id="imageModal" class="modal">
+            <div class="modal-content modal-image">
+                <div class="modal-header">
+                    <h2 id="imageModalTitle">Imagen de Carta</h2>
+                    <span class="close" id="closeImageModal">&times;</span>
+                </div>
+                <div class="modal-image-body">
+                    <img id="modalLargeImage" src="" alt="Imagen de carta" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <script src="cards.js"></script>
+</body>
+</html>
+
+
+
+

@@ -1,0 +1,44 @@
+═══════════════════════════════════════════════════════════════
+  INSTRUCCIONES PARA DESCARGAR IMÁGENES DE LAS CARTAS
+═══════════════════════════════════════════════════════════════
+
+1. Abre PowerShell o Terminal
+
+2. Navega a la carpeta del proyecto:
+   cd C:\Users\OLVIDADO\Documents\myl
+
+3. Ejecuta el script Python:
+   python scripts/descargar_y_organizar_imagenes.py
+
+4. Espera a que termine (puede tardar MUCHO tiempo)
+
+═══════════════════════════════════════════════════════════════
+
+El script hará lo siguiente:
+✅ Leerá las URLs de las imágenes desde la base de datos
+✅ Descargará las imágenes y las organizará en:
+   public/images/cards_new/{edicion}/{raza}/{tipo}/
+
+✅ Intentará cada imagen hasta 10 veces
+✅ Si falla después de 10 intentos, la saltará y continuará
+✅ Guardará las que no se pudieron descargar en:
+   server/data/cards/imagenes_no_descargadas.txt
+
+✅ Actualizará la base de datos con las rutas de las imágenes descargadas
+
+═══════════════════════════════════════════════════════════════
+
+NOTAS IMPORTANTES:
+- ⚠️  Este proceso puede tardar HORAS debido a rate limits de Google Drive
+- ⚠️  El script espera 1.5 segundos entre cada descarga
+- ⚠️  Si hay error 429 (Too Many Requests), espera más tiempo automáticamente
+- ⚠️  Puedes detener el script (Ctrl+C) y volver a ejecutarlo después
+- ⚠️  No descargará imágenes que ya existen
+
+═══════════════════════════════════════════════════════════════
+
+Para verificar cuántas imágenes se descargaron:
+python -c "import os; from pathlib import Path; dir_path = Path('public/images/cards_new'); total = sum(len(list(dir_path.rglob('*.png'))) + len(list(dir_path.rglob('*.jpg'))) for _ in [1]); print(f'Total de imágenes: {total}')"
+
+═══════════════════════════════════════════════════════════════
+

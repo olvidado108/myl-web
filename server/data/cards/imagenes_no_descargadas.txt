@@ -1,0 +1,24 @@
+================================================================================
+CARTAS SIN IMAGEN DESCARGADA
+================================================================================
+
+Total: 4 cartas
+
+ID: ra45
+Nombre: La Letania De Ra
+Razón: Error después de 10 intentos
+URL: https://drive.google.com/file/d/1k9pAOFF8hj-ujq2yDNvI1PZOCIASMdfm/view?usp=drivesdk
+--------------------------------------------------------------------------------
+ID: ra254
+Nombre: Mafedet
+Razón: Error después de 10 intentos
+URL: https://drive.google.com/file/d/141udrhvo6Ya7kIen1L7aI9L771icttBM/view?usp=drivesdk
+--------------------------------------------------------------------------------
+ID: he324
+Nombre: Helenica Aniversario
+Razón: No se pudo determinar ruta de carpeta
+--------------------------------------------------------------------------------
+ID: he289
+Nombre: Satiros Libres
+Razón: No se pudo determinar ruta de carpeta
+--------------------------------------------------------------------------------
