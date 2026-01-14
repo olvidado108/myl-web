@@ -94,3 +94,8 @@ INSERT OR IGNORE INTO tags (slug, nombre, categoria, descripcion) VALUES
   ('opcional', 'Efecto opcional', 'triggers', 'Texto incluye “puedes”');
 
 
+
+
+
+
+

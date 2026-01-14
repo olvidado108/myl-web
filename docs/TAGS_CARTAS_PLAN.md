@@ -99,3 +99,8 @@ slug → nombre
 5) Exponer lectura/búsqueda por tags en el repositorio/API/UI.
 
 
+
+
+
+
+

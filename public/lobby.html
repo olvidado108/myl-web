@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby - Mitos y Leyendas</title>
+    <link rel="stylesheet" href="css/auth.css">
+    <link rel="stylesheet" href="css/navbar.css">
+    <link rel="stylesheet" href="css/lobby.css">
+</head>
+<body>
+    <!-- Barra de navegación -->
+    <nav class="navbar">
+        <div class="navbar-container" id="navbar-container"></div>
+    </nav>
+
+    <div class="lobby-container">
+        <h1>🎮 Lobby de Partidas</h1>
+
+        <!-- Estadísticas del lobby -->
+        <div class="lobby-stats">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="playersOnline">0</div>
+                    <div class="stat-label">Jugadores Online</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">🎯</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="playersInQueue">0</div>
+                    <div class="stat-label">Buscando Partida</div>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⚔️</div>
+                <div class="stat-info">
+                    <div class="stat-value" id="activeGames">0</div>
+                    <div class="stat-label">Partidas Activas</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Búsqueda rápida -->
+        <div class="lobby-section">
+            <h2>⚡ Búsqueda Rápida</h2>
+            <div class="quick-match-form">
+                <select id="quickMatchDeck" class="form-control">
+                    <option value="">Cargando mazos...</option>
+                </select>
+                <select id="gameMode" class="form-control">
+                    <option value="ranked">Competitivo</option>
+                    <option value="casual">Casual</option>
+                </select>
+                <button id="findMatchBtn" class="btn btn-primary">
+                    <span id="findMatchText">Buscar Partida</span>
+                    <span id="findMatchSpinner" class="spinner" style="display: none;"></span>
+                </button>
+                <button id="cancelMatchBtn" class="btn btn-secondary" style="display: none;">
+                    Cancelar Búsqueda
+                </button>
+            </div>
+            <div id="matchmakingStatus" class="matchmaking-status" style="display: none;">
+                <p id="matchmakingMessage">Buscando oponente...</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Partidas disponibles -->
+        <div class="lobby-section">
+            <h2>📋 Partidas Disponibles</h2>
+            <button id="refreshGamesBtn" class="btn btn-sm">🔄 Actualizar</button>
+            <div id="availableGamesList" class="games-list">
+                <p class="empty-message">Cargando partidas...</p>
+            </div>
+        </div>
+
+        <!-- Crear/Unirse a partida privada -->
+        <div class="lobby-section">
+            <h2>🔒 Partidas Privadas</h2>
+            <div class="private-game-form">
+                <select id="privateGameDeck" class="form-control">
+                    <option value="">Cargando mazos...</option>
+                </select>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center; width:100%;">
+                    <input id="customInviteCode" class="form-control" type="text" placeholder="Código (opcional)">
+                    <button id="generateInviteCodeBtn" class="btn btn-sm btn-secondary">Auto-generar</button>
+                    <button id="createPrivateGameBtn" class="btn btn-secondary">Crear Partida Privada</button>
+                </div>
+            </div>
+            <div class="private-join-form">
+                <input id="joinInviteCode" class="form-control" type="text" placeholder="Código de invitación">
+                <select id="joinPrivateDeck" class="form-control">
+                    <option value="">Cargando mazos...</option>
+                </select>
+                <button id="joinPrivateGameBtn" class="btn btn-primary">
+                    Unirse a Privada
+                </button>
+            </div>
+            <div id="privateGameInfo" class="private-game-info" style="display: none;">
+                <p>Partida creada exitosamente!</p>
+                <div class="invite-code">
+                    <label>Código de Invitación:</label>
+                    <input type="text" id="inviteCode" readonly>
+                    <button id="copyInviteCodeBtn" class="btn btn-sm">📋 Copiar</button>
+                </div>
+                <p><small>Comparte este código con tu oponente</small></p>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/navbar.js"></script>
+    <!-- El servidor WS usa path /ws, por eso servimos el cliente en /ws/socket.io.js -->
+    <script src="/ws/socket.io.js"></script>
+    <script>
+        // Fallback si la librería de socket.io local no carga
+        if (typeof io === 'undefined') {
+            const fallback = document.createElement('script');
+            fallback.src = 'https://cdn.socket.io/4.7.5/socket.io.min.js';
+            document.head.appendChild(fallback);
+        }
+    </script>
+    <script src="js/lobby.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            await checkAuth(true);
+            await initNavbar();
+            await initLobby();
+        });
+    </script>
+</body>
+</html>
+

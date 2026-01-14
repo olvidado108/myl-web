@@ -1,16 +1,39 @@
 /**
  * Lógica del juego - Frontend
  */
+const GAME_JS_VERSION = 'mul6';
+console.log(`💡 Cargando game.js versión ${GAME_JS_VERSION}`);
+
+// Mostrar versión en UI
+document.addEventListener('DOMContentLoaded', () => {
+    const versionTag = document.createElement('div');
+    versionTag.textContent = `game.js ${GAME_JS_VERSION}`;
+    versionTag.style.position = 'fixed';
+    versionTag.style.right = '10px';
+    versionTag.style.bottom = '10px';
+    versionTag.style.background = 'rgba(0,0,0,0.7)';
+    versionTag.style.color = 'white';
+    versionTag.style.padding = '6px 10px';
+    versionTag.style.borderRadius = '6px';
+    versionTag.style.fontSize = '12px';
+    versionTag.style.zIndex = '2000';
+    versionTag.style.boxShadow = '0 2px 8px rgba(0,0,0,0.4)';
+    document.body.appendChild(versionTag);
+});
 
 let currentGameId = null;
 let currentGameState = null;
 let currentUserId = null;
+let gameSocket = null;
 let allCardsCache = {};
 let selectedCard = null;
 let selectedAttacker = null;
 let cardsToDiscard = [];
 let myPlayerKey = null;
 let opponentPlayerKey = null;
+let dropZonesInitialized = false;
+let chatInitialized = false;
+let isResyncingState = false;
 
 /**
  * Inicializa el juego
@@ -19,12 +42,24 @@ async function initGame() {
     try {
         console.log('🎮 Inicializando juego...');
         
+        const params = new URLSearchParams(window.location.search);
+        const gameIdFromUrl = params.get('gameId');
+        const starter = params.get('starter');
+
         const user = await api.getCurrentUser();
         if (user.success) {
             currentUserId = user.data.id;
             console.log('👤 Usuario identificado:', currentUserId);
         } else {
             console.error('❌ No se pudo obtener el usuario');
+        }
+
+        // Si viene gameId en la URL, conectar directo al WS y no mostrar modal
+        if (gameIdFromUrl) {
+            currentGameId = gameIdFromUrl;
+            await initNavbar();
+            await connectGameSocket(gameIdFromUrl, starter);
+            return;
         }
 
         // Cargar mazos disponibles
@@ -42,6 +77,8 @@ async function initGame() {
 
         // Event listeners
         setupEventListeners();
+        setupDropZones();
+        initChat();
         console.log('✅ Inicialización completa');
     } catch (error) {
         console.error('❌ Error al inicializar:', error);
@@ -62,9 +99,37 @@ function setupEventListeners() {
     document.getElementById('loadGameBtn').onclick = toggleLoadGames;
 
     // Botones de acciones del juego
-    document.getElementById('passPhaseBtn').onclick = () => performAction('pasar_fase', {});
-    document.getElementById('passTurnBtn').onclick = () => performAction('pasar_turno', {});
-    document.getElementById('endGameBtn').onclick = endCurrentGame;
+    const mulliganBtn = document.getElementById('mulliganBtn');
+    if (mulliganBtn) {
+        // Enlazar click directo y redundante en render para evitar falta de binding
+        mulliganBtn.onclick = () => {
+            console.log('🌀 Click mulligan (setup)');
+            requestMulligan();
+        };
+    } else {
+        console.warn('⚠️ Botón mulligan no encontrado');
+    }
+
+    const confirmHandBtn = document.getElementById('confirmHandBtn');
+    if (confirmHandBtn) {
+        confirmHandBtn.onclick = () => {
+            console.log('✅ Confirmar mano (setup)');
+            confirmHand();
+        };
+    }
+
+    const passPhaseBtn = document.getElementById('passPhaseBtn');
+    if (passPhaseBtn) {
+        passPhaseBtn.onclick = () => performAction('pasar_fase', {});
+    }
+    const passTurnBtn = document.getElementById('passTurnBtn');
+    if (passTurnBtn) {
+        passTurnBtn.onclick = () => performAction('pasar_turno', {});
+    }
+    const endGameBtn = document.getElementById('endGameBtn');
+    if (endGameBtn) {
+        endGameBtn.onclick = endCurrentGame;
+    }
 
     // Modal de objetivos
     document.getElementById('closeTargetModal').onclick = () => {
@@ -95,6 +160,79 @@ function setupEventListeners() {
             discardModal.style.display = 'none';
         }
     };
+}
+
+/**
+ * Conecta al WebSocket de juego y se une a la partida
+ */
+async function connectGameSocket(gameId, starter) {
+    const token = localStorage.getItem('auth_token') || localStorage.getItem('token');
+    if (!token) {
+        showError('Sesión no válida, vuelve a iniciar sesión');
+        window.location.href = '/login';
+        return;
+    }
+
+    gameSocket = io({
+        auth: { token },
+        path: '/ws',
+        transports: ['websocket'],
+        forceNew: true,
+        reconnectionAttempts: 3,
+        timeout: 10000
+    });
+
+    gameSocket.on('connect', () => {
+        console.log('✅ WS juego conectado');
+        gameSocket.emit('join_game', { gameId });
+        if (starter) {
+            gameSocket.emit('confirm_starter', { gameId });
+        }
+    });
+
+    gameSocket.on('state', async (payload) => {
+        console.log('📥 Estado recibido WS', payload);
+        currentGameId = gameId;
+        currentGameState = payload.gameState;
+
+        // Log mano propia para depurar mulligan
+        try {
+            const keys = Object.keys(currentGameState?.jugadores || {});
+            const myKey = currentGameState?.jugadores
+                ? keys.find(k => currentGameState.jugadores[k]?.id === currentUserId) || keys[0]
+                : null;
+            const myHand = myKey ? currentGameState.jugadores[myKey]?.mano : null;
+            console.log('🖐️ Mano en state WS', { myKey, handType: typeof myHand, isArray: Array.isArray(myHand), hand: myHand });
+        } catch (e) {
+            console.warn('⚠️ No se pudo loguear mano en state', e);
+        }
+
+        await renderGameState();
+    });
+
+    // Chat de partida
+    if (gameSocket.off) {
+        gameSocket.off('chat_message');
+    }
+    gameSocket.on('chat_message', (data) => {
+        displayChatMessage(data);
+    });
+
+    gameSocket.on('error', (err) => {
+        console.error('❌ Error WS juego:', err);
+        showError(err?.message || 'Error de WebSocket');
+    });
+
+    gameSocket.on('disconnect', () => {
+        console.warn('❌ WS juego desconectado');
+    });
+
+    // Heartbeat
+    gameSocket.on('heartbeat', () => {
+        gameSocket.emit('heartbeat');
+    });
+
+    initChat();
 }
 
 /**
@@ -274,8 +412,14 @@ async function renderGameState() {
     if (!currentGameState) return;
 
     // Actualizar header
-    document.getElementById('currentPhase').textContent = `Fase: ${formatPhaseName(currentGameState.fase)}`;
-    document.getElementById('turnNumber').textContent = `Turno ${currentGameState.turnoNumero}`;
+    const phaseLabel = document.getElementById('phaseText') || document.getElementById('currentPhase');
+    if (phaseLabel) {
+        phaseLabel.textContent = `Fase: ${formatPhaseName(currentGameState.fase)}`;
+    }
+    const turnLabel = document.getElementById('turnText') || document.getElementById('turnNumber');
+    if (turnLabel) {
+        turnLabel.textContent = `Turno ${currentGameState.turnoNumero}`;
+    }
     
     // Obtener claves de jugadores (pueden ser diferentes si tienen el mismo ID de usuario)
     const playerKeys = Object.keys(currentGameState.jugadores);
@@ -298,7 +442,10 @@ async function renderGameState() {
         return;
     }
     const isMyTurn = currentGameState.turnoActual === myPlayerKey;
-    document.getElementById('currentPlayer').textContent = isMyTurn ? 'Es tu turno' : 'Turno del oponente';
+    const currentPlayerEl = document.getElementById('currentPlayer');
+    if (currentPlayerEl) {
+        currentPlayerEl.textContent = isMyTurn ? 'Es tu turno' : 'Turno del oponente';
+    }
 
     console.log('🔍 Estado del jugador (myState):', myState);
     console.log('🔍 Mano del jugador:', myState?.mano);
@@ -311,19 +458,104 @@ async function renderGameState() {
     await renderOpponentState(opponentState, 'opponent', isMyTurn);
 
     // Actualizar contadores
-    document.getElementById('playerDeckCount').textContent = myState.mazo.length;
-    document.getElementById('playerResources').textContent = myState.recursos;
-    document.getElementById('playerResourcesTotal').textContent = myState.recursosTotales;
-    document.getElementById('playerCementerioCount').textContent = myState.cementerio.length;
-    document.getElementById('playerMazoCount').textContent = myState.mazo.length;
+    const deckCountEl = document.getElementById('playerDeckCount');
+    if (deckCountEl) deckCountEl.textContent = myState.mazo.length;
 
-    document.getElementById('opponentDeckCount').textContent = opponentState.mazo.length;
-    document.getElementById('opponentResources').textContent = `${opponentState.recursos}/${opponentState.recursosTotales}`;
+    const playerResourcesEl = document.getElementById('playerResources');
+    if (playerResourcesEl) playerResourcesEl.textContent = myState.recursos;
 
-    document.getElementById('handCount').textContent = Array.isArray(myState.mano) ? myState.mano.length : myState.mano;
+    const playerResourcesTotalEl = document.getElementById('playerResourcesTotal');
+    if (playerResourcesTotalEl) playerResourcesTotalEl.textContent = myState.recursosTotales;
+
+    const playerCementerioEl = document.getElementById('playerCementerioCount');
+    if (playerCementerioEl) playerCementerioEl.textContent = myState.cementerio.length;
+
+    const playerMazoEl = document.getElementById('playerMazoCount');
+    if (playerMazoEl) playerMazoEl.textContent = myState.mazo.length;
+
+    const playerReservaEl = document.getElementById('playerReservaCount');
+    if (playerReservaEl) playerReservaEl.textContent = Array.isArray(myState.reservaOro) ? myState.reservaOro.length : '--';
+
+    const playerOroPagadoEl = document.getElementById('playerOroPagadoCount');
+    if (playerOroPagadoEl) {
+        const usados = (myState.recursosTotales ?? 0) - (myState.recursos ?? 0);
+        playerOroPagadoEl.textContent = usados >= 0 ? usados : '--';
+    }
+
+    const opponentDeckEl = document.getElementById('opponentDeckCount');
+    if (opponentDeckEl) opponentDeckEl.textContent = opponentState.mazo.length;
+
+    const opponentResourcesEl = document.getElementById('opponentResources');
+    if (opponentResourcesEl) opponentResourcesEl.textContent = `${opponentState.recursos}/${opponentState.recursosTotales}`;
+
+    const handCountEl = document.getElementById('handCount');
+    if (handCountEl) handCountEl.textContent = Array.isArray(myState.mano) ? myState.mano.length : myState.mano;
+
+    const opponentCementerioEl = document.getElementById('opponentCementerioCount');
+    if (opponentCementerioEl) opponentCementerioEl.textContent = Array.isArray(opponentState.cementerio) ? opponentState.cementerio.length : '--';
+
+    const opponentReservaEl = document.getElementById('opponentReservaCount');
+    if (opponentReservaEl) opponentReservaEl.textContent = Array.isArray(opponentState.reservaOro) ? opponentState.reservaOro.length : '--';
+
+    const opponentOroPagadoEl = document.getElementById('opponentOroPagadoCount');
+    if (opponentOroPagadoEl) {
+        const usados = (opponentState.recursosTotales ?? 0) - (opponentState.recursos ?? 0);
+        opponentOroPagadoEl.textContent = usados >= 0 ? usados : '--';
+    }
+
+    // Estado de mulligan
+    const mulliganBtn = document.getElementById('mulliganBtn');
+    const mulligans = currentGameState.mulligans || {};
+    const misMulligans = mulligans[myPlayerKey] || 0;
+    const mulliganListo = currentGameState.mulliganListo || {};
+    const estoyListo = !!mulliganListo[myPlayerKey];
+    const mulliganCompletado = !!currentGameState.mulliganCompletado;
+    const canMulligan = currentGameState.turnoNumero === 1 && !currentGameState.finalizado && !estoyListo && !mulliganCompletado;
+    if (mulliganBtn) {
+        mulliganBtn.onclick = () => {
+            console.log('🌀 Click mulligan (render)');
+            requestMulligan();
+        };
+        mulliganBtn.disabled = !canMulligan;
+        mulliganBtn.textContent = misMulligans > 0 ? `Mulligan (-${misMulligans})` : 'Mulligan';
+        console.log('🌀 Mulligan state', { turno: currentGameState.turnoNumero, fase: currentGameState.fase, misMulligans, canMulligan, estoyListo, mulliganCompletado });
+    }
+
+    const confirmHandBtn = document.getElementById('confirmHandBtn');
+    const canConfirmHand = currentGameState.turnoNumero === 1 && !currentGameState.finalizado && !estoyListo;
+    if (confirmHandBtn) {
+        confirmHandBtn.onclick = () => {
+            console.log('✅ Confirmar mano (render)');
+            confirmHand();
+        };
+        confirmHandBtn.disabled = !canConfirmHand;
+        confirmHandBtn.textContent = estoyListo ? 'Listo ✓' : 'Confirmar mano';
+    }
+
+    // Si la mano aparece vacía después de un mulligan, intentar resincronizar estado (fallback)
+    if (!isResyncingState && Array.isArray(myState.mano) && myState.mano.length === 0 && (misMulligans || 0) > 0) {
+        isResyncingState = true;
+        console.warn('⚠️ Mano vacía tras mulligan, resincronizando estado vía API...');
+        api.getGame(currentGameId)
+            .then((resp) => {
+                if (resp.success && resp.data?.gameState) {
+                    currentGameState = resp.data.gameState;
+                    console.log('✅ Estado resincronizado desde API', {
+                        mano: currentGameState?.jugadores?.[myPlayerKey]?.mano
+                    });
+                    renderGameState();
+                } else {
+                    console.warn('⚠️ No se pudo resincronizar estado:', resp);
+                }
+            })
+            .catch((err) => console.error('❌ Error resincronizando estado', err))
+            .finally(() => {
+                isResyncingState = false;
+            });
+    }
 
     // Habilitar/deshabilitar botones según el turno
-    const actionsEnabled = isMyTurn && !currentGameState.finalizado;
+    const actionsEnabled = isMyTurn && !currentGameState.finalizado && currentGameState.mulliganCompletado;
     document.getElementById('passPhaseBtn').disabled = !actionsEnabled;
     document.getElementById('passTurnBtn').disabled = !actionsEnabled || currentGameState.fase !== 'final';
 
@@ -338,23 +570,46 @@ async function renderGameState() {
 }
 
 /**
+ * Mapea un prefijo de jugador y tipo de zona al ID del contenedor en el DOM
+ */
+function getZoneContainerId(prefix, zoneType) {
+    const map = {
+        player: {
+            hand: 'hand',
+            defensa: 'me-defensa',
+            ataque: 'me-ataque',
+            apoyo: 'me-apoyo',
+            oro: 'me-oro'
+        },
+        opponent: {
+            defensa: 'opp-defensa',
+            ataque: 'opp-ataque',
+            apoyo: 'opp-apoyo',
+            oro: 'opp-oro'
+        }
+    };
+
+    return map[prefix]?.[zoneType];
+}
+
+/**
  * Renderiza el estado de un jugador
  */
 async function renderPlayerState(playerState, prefix, isMyTurn) {
     // Mano
-    await renderZone(playerState.mano, `${prefix}HandZone`, 'hand', isMyTurn);
+    await renderZone(playerState.mano, getZoneContainerId(prefix, 'hand'), 'hand', isMyTurn);
     
     // Línea de Defensa
-    await renderZone(playerState.lineaDefensa, `${prefix}DefensaZone`, 'defensa', isMyTurn);
+    await renderZone(playerState.lineaDefensa, getZoneContainerId(prefix, 'defensa'), 'defensa', isMyTurn);
     
     // Línea de Ataque
-    await renderZone(playerState.lineaAtaque, `${prefix}AtaqueZone`, 'ataque', isMyTurn);
+    await renderZone(playerState.lineaAtaque, getZoneContainerId(prefix, 'ataque'), 'ataque', isMyTurn);
     
     // Línea de Apoyo
-    await renderZone(playerState.lineaApoyo, `${prefix}ApoyoZone`, 'apoyo', isMyTurn);
+    await renderZone(playerState.lineaApoyo, getZoneContainerId(prefix, 'apoyo'), 'apoyo', isMyTurn);
     
     // Reserva de Oro
-    await renderZone(playerState.reservaOro, `${prefix}OroZone`, 'oro', isMyTurn);
+    await renderZone(playerState.reservaOro, getZoneContainerId(prefix, 'oro'), 'oro', isMyTurn);
 }
 
 /**
@@ -362,16 +617,16 @@ async function renderPlayerState(playerState, prefix, isMyTurn) {
  */
 async function renderOpponentState(opponentState, prefix, isMyTurn) {
     // Línea de Defensa
-    await renderZone(opponentState.lineaDefensa, `${prefix}DefensaZone`, 'defensa', isMyTurn, true);
+    await renderZone(opponentState.lineaDefensa, getZoneContainerId(prefix, 'defensa'), 'defensa', isMyTurn, true);
     
     // Línea de Ataque
-    await renderZone(opponentState.lineaAtaque, `${prefix}AtaqueZone`, 'ataque', isMyTurn, true);
+    await renderZone(opponentState.lineaAtaque, getZoneContainerId(prefix, 'ataque'), 'ataque', isMyTurn, true);
     
     // Línea de Apoyo
-    await renderZone(opponentState.lineaApoyo, `${prefix}ApoyoZone`, 'apoyo', isMyTurn);
+    await renderZone(opponentState.lineaApoyo, getZoneContainerId(prefix, 'apoyo'), 'apoyo', isMyTurn);
     
     // Reserva de Oro
-    await renderZone(opponentState.reservaOro, `${prefix}OroZone`, 'oro', isMyTurn);
+    await renderZone(opponentState.reservaOro, getZoneContainerId(prefix, 'oro'), 'oro', isMyTurn);
 }
 
 /**
@@ -428,6 +683,81 @@ async function renderZone(cardIds, containerId, zoneType, isMyTurn, isOpponentDe
 }
 
 /**
+ * Configura zonas de drop para drag & drop
+ */
+function setupDropZones() {
+    if (dropZonesInitialized) return;
+
+    const dropZones = document.querySelectorAll('.zone[data-zone-type]');
+    if (!dropZones || dropZones.length === 0) {
+        console.warn('⚠️ No se encontraron zonas de drop para inicializar');
+        return;
+    }
+
+    dropZones.forEach(zone => {
+        const zoneType = zone.dataset.zoneType;
+        const zoneOwner = zone.dataset.owner || 'player';
+
+        zone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            const cardId = e.dataTransfer.getData('cardId');
+            const sourceZone = e.dataTransfer.getData('zoneType');
+            if (canPlayCardInZone(cardId, zoneType, sourceZone, zoneOwner)) {
+                zone.classList.add('drop-target');
+            }
+        });
+
+        zone.addEventListener('dragleave', () => {
+            zone.classList.remove('drop-target');
+        });
+
+        zone.addEventListener('drop', async (e) => {
+            e.preventDefault();
+            zone.classList.remove('drop-target');
+            const cardId = e.dataTransfer.getData('cardId');
+            const sourceZone = e.dataTransfer.getData('zoneType');
+            if (canPlayCardInZone(cardId, zoneType, sourceZone, zoneOwner)) {
+                await playCardToZone(cardId, zoneType);
+            }
+        });
+    });
+
+    dropZonesInitialized = true;
+}
+
+/**
+ * Valida si una carta puede jugarse en una zona destino
+ */
+function canPlayCardInZone(cardId, zoneType, sourceZone = 'hand', zoneOwner = 'player') {
+    if (!cardId || !currentGameState) return false;
+    if (zoneOwner !== 'player') return false; // no permitir soltar en zonas del oponente
+    if (sourceZone !== 'hand') return false; // solo desde la mano
+    if (currentGameState.turnoActual !== myPlayerKey) return false;
+
+    const card = allCardsCache[cardId];
+    const myState = currentGameState.jugadores?.[myPlayerKey];
+    const faseActual = currentGameState.fase;
+    const oroJugado = currentGameState.oroJugadoEnTurno?.[myPlayerKey];
+
+    if (!card || !myState) return false;
+
+    const costo = card.coste || 0;
+
+    if (card.tipo === 'Oro') {
+        return zoneType === 'oro' && faseActual === 'comienzo_vigilia' && !oroJugado;
+    }
+
+    const tieneRecursos = myState.recursos >= costo;
+
+    if (card.tipo === 'Talisman') {
+        return (faseActual === 'vigilia' || faseActual === 'batalla') && tieneRecursos && zoneType !== 'oro';
+    }
+
+    // Resto de cartas (aliados, armas, etc.) se juegan en vigilia en zonas distintas a oro
+    return faseActual === 'vigilia' && tieneRecursos && zoneType !== 'oro';
+}
+
+/**
  * Crea un elemento HTML para una carta
  */
 function createCardElement(card, zoneType, isMyTurn, isOpponentDefense = false) {
@@ -436,71 +766,90 @@ function createCardElement(card, zoneType, isMyTurn, isOpponentDefense = false) 
         div.className = 'game-card';
         div.dataset.cardId = card.id;
         div.dataset.zoneType = zoneType;
+        div.dataset.cardType = card.tipo || '';
+        if (card.coste !== undefined) {
+            div.dataset.cardCost = card.coste;
+        }
 
-    // Mostrar imagen si está disponible
-    if (card.imagenUrl) {
-        const img = document.createElement('img');
-        img.src = card.imagenUrl;
-        img.alt = card.nombre;
-        img.onerror = () => {
-            img.style.display = 'none';
+        if (isMyTurn && zoneType === 'hand') {
+            div.draggable = true;
+
+            div.addEventListener('dragstart', (e) => {
+                e.dataTransfer.setData('cardId', card.id);
+                e.dataTransfer.setData('zoneType', zoneType);
+                div.classList.add('dragging');
+            });
+
+            div.addEventListener('dragend', () => {
+                div.classList.remove('dragging');
+                document.querySelectorAll('.zone').forEach(z => z.classList.remove('drop-target'));
+            });
+        }
+
+        // Mostrar imagen si está disponible
+        if (card.imagenUrl) {
+            const img = document.createElement('img');
+            img.src = card.imagenUrl;
+            img.alt = card.nombre;
+            img.onerror = () => {
+                img.style.display = 'none';
+                div.textContent = card.nombre.substring(0, 10);
+            };
+            div.appendChild(img);
+        } else {
             div.textContent = card.nombre.substring(0, 10);
-        };
-        div.appendChild(img);
-    } else {
-        div.textContent = card.nombre.substring(0, 10);
-    }
+        }
 
-    // Información de la carta
-    const info = document.createElement('div');
-    info.className = 'card-info';
-    let infoText = card.nombre;
-    if (card.fuerza) infoText += ` (${card.fuerza})`;
-    if (card.coste !== undefined) infoText += ` [${card.coste}]`;
-    info.textContent = infoText;
-    div.appendChild(info);
+        // Información de la carta
+        const info = document.createElement('div');
+        info.className = 'card-info';
+        let infoText = card.nombre;
+        if (card.fuerza) infoText += ` (${card.fuerza})`;
+        if (card.coste !== undefined) infoText += ` [${card.coste}]`;
+        info.textContent = infoText;
+        div.appendChild(info);
 
-    // Agregar funcionalidad según la zona y si es mi turno
-    if (isMyTurn) {
-        const faseActual = currentGameState.fase;
-        const myState = currentGameState.jugadores[myPlayerKey];
-        const oroJugado = currentGameState.oroJugadoEnTurno?.[myPlayerKey];
+        // Agregar funcionalidad según la zona y si es mi turno
+        if (isMyTurn) {
+            const faseActual = currentGameState.fase;
+            const myState = currentGameState.jugadores[myPlayerKey];
+            const oroJugado = currentGameState.oroJugadoEnTurno?.[myPlayerKey];
 
-        if (zoneType === 'hand') {
-            // Carta en mano: se puede jugar según fase y tipo
-            const costo = card.coste || 0;
-            let canPlay = false;
+            if (zoneType === 'hand') {
+                // Carta en mano: se puede jugar según fase y tipo
+                const costo = card.coste || 0;
+                let canPlay = false;
 
-            if (card.tipo === 'Oro') {
-                canPlay = faseActual === 'comienzo_vigilia' && !oroJugado;
-            } else if (card.tipo === 'Talisman') {
-                canPlay = (faseActual === 'vigilia' || faseActual === 'batalla') && myState && myState.recursos >= costo;
-            } else {
-                canPlay = faseActual === 'vigilia' && myState && myState.recursos >= costo;
-            }
+                if (card.tipo === 'Oro') {
+                    canPlay = faseActual === 'comienzo_vigilia' && !oroJugado;
+                } else if (card.tipo === 'Talisman') {
+                    canPlay = (faseActual === 'vigilia' || faseActual === 'batalla') && myState && myState.recursos >= costo;
+                } else {
+                    canPlay = faseActual === 'vigilia' && myState && myState.recursos >= costo;
+                }
 
-            if (canPlay) {
-                div.classList.add('playable');
-                div.onclick = () => playCard(card.id);
-            }
-        } else if (zoneType === 'defensa') {
-            // Aliado en línea de defensa: se puede declarar ataque
-            if (faseActual === 'batalla' && !card.girada) {
-                div.onclick = () => selectAttacker(card.id);
-            }
-        } else if (isOpponentDefense && zoneType === 'defensa') {
-            // Aliado del oponente: se puede seleccionar como objetivo
-            if (selectedAttacker) {
-                div.onclick = () => attackTarget(card.id);
-                div.classList.add('playable');
+                if (canPlay) {
+                    div.classList.add('playable');
+                    div.onclick = () => playCard(card.id);
+                }
+            } else if (zoneType === 'defensa') {
+                // Aliado en línea de defensa: se puede declarar ataque
+                if (faseActual === 'batalla' && !card.girada) {
+                    div.onclick = () => selectAttacker(card.id);
+                }
+            } else if (isOpponentDefense && zoneType === 'defensa') {
+                // Aliado del oponente: se puede seleccionar como objetivo
+                if (selectedAttacker) {
+                    div.onclick = () => attackTarget(card.id);
+                    div.classList.add('playable');
+                }
             }
         }
-    }
 
-    // Tooltip con información completa
-    div.title = `${card.nombre}\nTipo: ${card.tipo}\n${card.fuerza ? 'Fuerza: ' + card.fuerza : ''}\n${card.coste !== undefined ? 'Coste: ' + card.coste : ''}`;
+        // Tooltip con información completa
+        div.title = `${card.nombre}\nTipo: ${card.tipo}\n${card.fuerza ? 'Fuerza: ' + card.fuerza : ''}\n${card.coste !== undefined ? 'Coste: ' + card.coste : ''}`;
 
-    return div;
+        return div;
     } catch (error) {
         console.error(`❌ Error creando elemento para carta ${card.id}:`, error);
         // Retornar un elemento básico en caso de error
@@ -542,42 +891,75 @@ async function getCardData(cardId) {
  * Realiza una acción en el juego
  */
 async function performAction(accion, datos) {
-    if (!currentGameId) return;
-
-    try {
-        const response = await api.performGameAction(currentGameId, accion, datos);
-        
-        if (response.success) {
-            currentGameState = response.data.gameState;
-            
-            // Renderizar nuevo estado
-            await renderGameState();
-            
-            // Manejar acciones especiales
-            if (response.data.resultado && response.data.resultado.requiereDescarte) {
-                showDiscardModal(response.data.resultado.cartasEnMano - 8);
-            }
-
-            if (response.data.finalizado) {
-                showMessage(`¡Partida finalizada! Ganador: ${response.data.ganador === currentUserId ? 'Tú' : 'Oponente'}`, 
-                    response.data.ganador === currentUserId ? 'success' : 'error');
-            } else {
-                showMessage(response.data.resultado?.mensaje || 'Acción realizada', 'success');
-            }
-        }
-    } catch (error) {
-        showError('Error al realizar acción: ' + error.message);
+    if (!currentGameId) {
+        console.warn(`⚠️ performAction sin currentGameId para accion ${accion}`);
+        showError('No hay partida activa (sin gameId)');
+        return;
     }
+
+    console.log('➡️ performAction (solo WS)', { accion, datos, gameId: currentGameId, hasSocket: !!gameSocket, socketConnected: gameSocket?.connected, version: GAME_JS_VERSION });
+
+    if (gameSocket && gameSocket.connected) {
+        console.log('📤 Enviando acción por WS', { accion, datos, gameId: currentGameId });
+        gameSocket.emit('action', {
+            gameId: currentGameId,
+            accion,
+            datos
+        });
+        showActionFeedback('Acción enviada', 'info');
+        return;
+    }
+
+    console.warn('⚠️ WS no conectado, no se envió la acción', { hasSocket: !!gameSocket, connected: gameSocket?.connected });
+    showError('WS no conectado, recarga la partida. (Solo WS, sin HTTP)');
+}
+
+/**
+ * Solicita un mulligan
+ */
+async function requestMulligan() {
+    console.log('🌀 Solicitando mulligan...');
+    showActionFeedback('Solicitando mulligan...', 'info');
+    await performAction('mulligan', {});
+}
+
+/**
+ * Confirma la mano inicial para cerrar el mulligan del jugador
+ */
+async function confirmHand() {
+    console.log('✅ Confirmando mano...');
+    showActionFeedback('Confirmando mano...', 'info');
+    await performAction('confirmar_mano', {});
+}
+
+/**
+ * Juega una carta hacia una zona específica (drag & drop)
+ */
+async function playCardToZone(cardId, zoneType) {
+    if (!cardId) return;
+
+    showActionFeedback('Jugando carta...', 'info');
+    highlightCard(cardId, 800);
+
+    // Animación rápida a la carta en mano
+    const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+    if (cardEl) {
+        cardEl.classList.add('card-played');
+        setTimeout(() => cardEl.classList.remove('card-played'), 600);
+    }
+
+    await performAction('jugar_carta', {
+        carta_id: cardId,
+        objetivo_id: null,
+        zona: zoneType
+    });
 }
 
 /**
  * Juega una carta
  */
 async function playCard(cardId) {
-    await performAction('jugar_carta', {
-        carta_id: cardId,
-        objetivo_id: null
-    });
+    await playCardToZone(cardId, null);
 }
 
 /**
@@ -619,10 +1001,20 @@ function selectAttacker(cardId) {
 async function attackTarget(targetCardId) {
     if (!selectedAttacker) return;
 
+    showActionFeedback('Atacando...', 'info');
+    highlightCard(selectedAttacker, 800);
+    if (targetCardId) {
+        highlightCard(targetCardId, 800);
+    }
+
     await performAction('atacar', {
         atacante_id: selectedAttacker,
         objetivo_id: targetCardId
     });
+
+    if (targetCardId) {
+        shakeCard(targetCardId);
+    }
 
     selectedAttacker = null;
     document.getElementById('targetModal').style.display = 'none';
@@ -703,10 +1095,184 @@ async function endCurrentGame() {
 }
 
 /**
+ * Muestra feedback visual de una acción
+ */
+function showActionFeedback(message, type = 'info') {
+    const feedbackEl = document.createElement('div');
+    feedbackEl.className = `action-feedback ${type}`;
+    feedbackEl.textContent = message;
+
+    const messagesContainer = document.getElementById('gameMessages');
+    if (messagesContainer) {
+        messagesContainer.appendChild(feedbackEl);
+
+        setTimeout(() => {
+            feedbackEl.style.opacity = '0';
+            feedbackEl.style.transform = 'translateY(-20px)';
+            setTimeout(() => feedbackEl.remove(), 300);
+        }, 3000);
+    }
+}
+
+/**
+ * Resalta temporalmente una carta
+ */
+function highlightCard(cardId, duration = 1000) {
+    const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+    if (!cardEl) return;
+
+    cardEl.classList.add('highlighted');
+    setTimeout(() => {
+        cardEl.classList.remove('highlighted');
+    }, duration);
+}
+
+/**
+ * Anima una carta al recibir daño
+ */
+function shakeCard(cardId) {
+    const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+    if (!cardEl) return;
+
+    cardEl.classList.add('card-damaged');
+    setTimeout(() => {
+        cardEl.classList.remove('card-damaged');
+    }, 500);
+}
+
+/**
+ * Resalta una zona brevemente
+ */
+function glowZone(zoneId, color = '#4CAF50') {
+    const zoneEl = document.getElementById(zoneId);
+    if (!zoneEl) return;
+
+    zoneEl.style.boxShadow = `0 0 20px ${color}`;
+    setTimeout(() => {
+        zoneEl.style.boxShadow = '';
+    }, 1000);
+}
+
+/**
+ * Inicializa UI y listeners del chat en partida
+ */
+function initChat() {
+    const chatInput = document.getElementById('chatInput');
+    const sendBtn = document.getElementById('sendChatBtn');
+    const toggleBtn = document.getElementById('toggleChatBtn');
+
+    // Vincular listener de socket cada vez que se llame
+    if (gameSocket) {
+        gameSocket.off?.('chat_message');
+        gameSocket.on('chat_message', (data) => displayChatMessage(data));
+    }
+
+    if (!chatInput || !sendBtn || !toggleBtn) {
+        return;
+    }
+
+    if (chatInitialized) return;
+    chatInitialized = true;
+
+    chatInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            sendChatMessage();
+        }
+    });
+
+    sendBtn.addEventListener('click', sendChatMessage);
+
+    toggleBtn.addEventListener('click', () => {
+        const chatContainer = document.getElementById('gameChat');
+        const chatMessages = document.getElementById('chatMessages');
+        const chatInputContainer = document.querySelector('.chat-input-container');
+
+        if (!chatContainer || !chatMessages || !chatInputContainer) return;
+
+        if (chatContainer.classList.contains('collapsed')) {
+            chatContainer.classList.remove('collapsed');
+            chatMessages.style.display = 'block';
+            chatInputContainer.style.display = 'flex';
+            toggleBtn.textContent = '−';
+        } else {
+            chatContainer.classList.add('collapsed');
+            chatMessages.style.display = 'none';
+            chatInputContainer.style.display = 'none';
+            toggleBtn.textContent = '+';
+        }
+    });
+}
+
+/**
+ * Envía un mensaje de chat al servidor
+ */
+function sendChatMessage() {
+    const chatInput = document.getElementById('chatInput');
+    if (!chatInput) return;
+
+    const message = chatInput.value.trim();
+
+    if (!message || !currentGameId) return;
+
+    if (gameSocket) {
+        gameSocket.emit('chat_message', {
+            gameId: currentGameId,
+            message
+        });
+        chatInput.value = '';
+    }
+}
+
+/**
+ * Muestra un mensaje en el chat
+ */
+function displayChatMessage(data) {
+    const chatMessages = document.getElementById('chatMessages');
+    if (!chatMessages) return;
+
+    const messageEl = document.createElement('div');
+    messageEl.className = 'chat-message';
+
+    const isMyMessage = data.userId === currentUserId;
+    if (isMyMessage) {
+        messageEl.classList.add('my-message');
+    }
+
+    const time = new Date(data.timestamp).toLocaleTimeString('es-ES', {
+        hour: '2-digit',
+        minute: '2-digit'
+    });
+
+    messageEl.innerHTML = `
+        <div class="chat-message-header">
+            <span class="chat-username">${escapeHtml(data.username || data.userId)}</span>
+            <span class="chat-time">${time}</span>
+        </div>
+        <div class="chat-message-text">${escapeHtml(data.message)}</div>
+    `;
+
+    chatMessages.appendChild(messageEl);
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+/**
+ * Escapa HTML para prevenir XSS
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+/**
  * Muestra un mensaje
  */
 function showMessage(text, type = 'info') {
     const messagesContainer = document.getElementById('gameMessages');
+    if (!messagesContainer) {
+        console.warn('⚠️ Contenedor de mensajes no encontrado');
+        return;
+    }
     const message = document.createElement('div');
     message.className = `message ${type}`;
     message.textContent = text;
@@ -745,4 +1311,10 @@ function formatPhaseName(phase) {
     };
     return map[phase] || capitalizeFirst(phase || '');
 }
+
+
+
+
+
+
 

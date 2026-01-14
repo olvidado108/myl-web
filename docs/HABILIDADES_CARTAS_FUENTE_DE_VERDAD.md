@@ -98,3 +98,8 @@ WHERE id = '<CARD_ID>';
 - Validador: `game-engine/abilities/AbilityValidator.js`
 
 
+
+
+
+
+

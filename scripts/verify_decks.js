@@ -5,3 +5,8 @@ console.log('Mazos en game.db:');
 mazos.forEach(m => console.log(`  - ${m.nombre} (ID: ${m.id}, Usuario: ${m.usuario_id})`));
 db.close();
 
+
+
+
+
+

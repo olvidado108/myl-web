@@ -5,7 +5,8 @@
 class ApiClient {
     constructor(baseUrl = '') {
         this.baseUrl = baseUrl;
-        this.token = localStorage.getItem('auth_token');
+        // Mantener compatibilidad con tokens guardados como "token" en versiones anteriores
+        this.token = localStorage.getItem('auth_token') || localStorage.getItem('token');
     }
 
     /**
@@ -14,9 +15,12 @@ class ApiClient {
     setToken(token) {
         this.token = token;
         if (token) {
+            // Guardar en ambas claves para compatibilidad con WS y peticiones HTTP
             localStorage.setItem('auth_token', token);
+            localStorage.setItem('token', token);
         } else {
             localStorage.removeItem('auth_token');
+            localStorage.removeItem('token');
         }
     }
 
@@ -24,7 +28,8 @@ class ApiClient {
      * Obtiene el token actual
      */
     getToken() {
-        return this.token || localStorage.getItem('auth_token');
+        // Usar cualquiera de las dos claves disponibles
+        return this.token || localStorage.getItem('auth_token') || localStorage.getItem('token');
     }
 
     /**

@@ -90,3 +90,8 @@ Si el problema es que las cartas no se encuentran:
 2. ⏳ Usuario debe probar y reportar qué ve en consola
 3. ⏳ Ajustar según los logs
 
+
+
+
+
+

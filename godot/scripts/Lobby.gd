@@ -47,3 +47,8 @@ func _on_join_pressed() -> void:
 	get_tree().set_meta("session", session)
 	get_tree().change_scene_to_file("res://scenes/Game.tscn")
 
+
+
+
+
+

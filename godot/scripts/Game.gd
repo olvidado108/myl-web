@@ -127,3 +127,8 @@ func _extract_recursos(state: Dictionary) -> Dictionary:
 				}
 	return {}
 
+
+
+
+
+

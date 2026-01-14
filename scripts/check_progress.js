@@ -45,3 +45,8 @@ console.log(`Progreso: ${((procesadas.count / total.count) * 100).toFixed(2)}%\n
 
 db.close();
 
+
+
+
+
+

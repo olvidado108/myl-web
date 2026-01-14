@@ -83,3 +83,8 @@ conn.close()
 print("updated", card_id)
 
 
+
+
+
+
+

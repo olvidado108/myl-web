@@ -201,3 +201,8 @@ Array.from(frequency.entries())
 console.error(`Cartas analizadas: ${cards.length}, con sugerencias: ${suggestions.length}`);
 
 
+
+
+
+
+
