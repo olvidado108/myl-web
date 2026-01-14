@@ -116,3 +116,8 @@ Ejecuta: `pip install pytesseract pillow`
 
 
 
+
+
+
+
+

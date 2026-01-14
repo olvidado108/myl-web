@@ -450,6 +450,9 @@ class GameController {
             gameState.jugadorInicialKey = estadoJson.jugadorInicialKey || gameState.jugadorInicialKey;
             gameState.oroJugadoEnTurno = estadoJson.oroJugadoEnTurno || gameState.oroJugadoEnTurno;
             gameState.roboInicialSaltado = estadoJson.roboInicialSaltado || false;
+            gameState.mulligans = estadoJson.mulligans || gameState.mulligans;
+            gameState.mulliganListo = estadoJson.mulliganListo || gameState.mulliganListo;
+            gameState.mulliganCompletado = estadoJson.mulliganCompletado || false;
             
             // Copiar estados de jugadores
             if (estadoJson.jugadores) {
@@ -463,6 +466,17 @@ class GameController {
                 });
             }
         }
+
+        // Asegurar que mulliganListo tenga claves para ambos jugadores
+        const jugadorKeys = Object.keys(gameState.jugadores);
+        gameState.mulliganListo = gameState.mulliganListo || {};
+        jugadorKeys.forEach((key) => {
+            if (typeof gameState.mulliganListo[key] !== 'boolean') {
+                gameState.mulliganListo[key] = false;
+            }
+        });
+        // Recalcular flag global
+        gameState.estaMulliganCompletado();
 
         // Inicializar AbilityManager si no existe
         if (!this.abilityManager) {
@@ -792,6 +806,86 @@ class GameController {
     }
 
     /**
+     * Ejecuta mulligan (solo al inicio de la partida).
+     * Primer mulligan: 7 cartas, segundo: 6, tercero: 5 (límite 3).
+     */
+    _mulligan(gameState, userId) {
+        const playerKey = gameState.getKeyPorId(userId);
+        if (!playerKey) {
+            return { exito: false, error: 'Jugador no encontrado' };
+        }
+
+        if (gameState.turnoNumero !== 1 || gameState.finalizado) {
+            return { exito: false, error: 'El mulligan solo se puede realizar en el turno 1 antes de finalizar' };
+        }
+
+        const actual = gameState.mulligans?.[playerKey] || 0;
+        if (gameState.mulliganListo?.[playerKey]) {
+            return { exito: false, error: 'Ya confirmaste tu mano, no puedes hacer más mulligan' };
+        }
+
+        const jugador = gameState.jugadores[playerKey];
+        if (!jugador) {
+            return { exito: false, error: 'Estado de jugador no disponible' };
+        }
+
+        const mazoActual = Array.isArray(jugador.mazo) ? jugador.mazo : [];
+        const manoActual = Array.isArray(jugador.mano) ? jugador.mano : [];
+
+        // Regresar la mano al mazo y barajar
+        const mazoConMano = barajar([...mazoActual, ...manoActual]);
+
+        // Calcular nuevo tamaño de mano: 8 - mulliganIndex, mínimo 1
+        const nuevoTamano = Math.max(1, 8 - (actual + 1));
+        const nuevaMano = mazoConMano.slice(0, nuevoTamano);
+        const mazoRestante = mazoConMano.slice(nuevoTamano);
+
+        jugador.mano = nuevaMano;
+        jugador.mazo = mazoRestante;
+
+        gameState.mulligans[playerKey] = actual + 1;
+        // Al hacer mulligan, ese jugador aún no ha confirmado y el proceso global sigue abierto
+        if (!gameState.mulliganListo) gameState.mulliganListo = {};
+        gameState.mulliganListo[playerKey] = false;
+        gameState.mulliganCompletado = false;
+
+        return {
+            exito: true,
+            mensaje: `Mulligan ${actual + 1}: nueva mano de ${nuevoTamano} cartas`
+        };
+    }
+
+    /**
+     * Confirma que el jugador mantiene su mano actual y cierra su mulligan
+     */
+    _confirmarMano(gameState, userId) {
+        const playerKey = gameState.getKeyPorId(userId);
+        if (!playerKey) {
+            return { exito: false, error: 'Jugador no encontrado' };
+        }
+
+        if (gameState.turnoNumero !== 1 || gameState.finalizado) {
+            return { exito: false, error: 'Solo puedes confirmar la mano al inicio de la partida' };
+        }
+
+        gameState.mulliganListo = gameState.mulliganListo || {};
+        if (gameState.mulliganListo[playerKey]) {
+            return { exito: true, mensaje: 'Ya confirmaste tu mano' };
+        }
+
+        gameState.mulliganListo[playerKey] = true;
+        const completado = gameState.estaMulliganCompletado();
+
+        return {
+            exito: true,
+            mensaje: completado
+                ? 'Ambos jugadores confirmaron su mano. ¡Comienza la partida!'
+                : 'Mano confirmada. Espera a que tu oponente termine su mulligan.',
+            mulliganCompletado: completado
+        };
+    }
+
+    /**
      * Pasa a la siguiente fase
      */
     _pasarFase(gameState) {
@@ -841,7 +935,8 @@ class GameController {
      * Filtra el estado del juego para mostrar solo lo que el jugador puede ver
      */
     _filtrarEstadoParaJugador(gameState, jugadorId) {
-        const estadoCompleto = gameState.toJSON();
+        // Clonar profundamente para no mutar el estado original al filtrar
+        const estadoCompleto = JSON.parse(JSON.stringify(gameState.toJSON()));
         
         // Obtener las claves internas de los jugadores
         const jugadorKeys = Object.keys(estadoCompleto.jugadores);
@@ -983,8 +1078,15 @@ GameController.prototype._ejecutarAccionInterna = async function (gameId, userId
     // Verificar turno
     const jugadorEnTurno = gameState.getJugadorEnTurno();
     const esTurnoDelUsuario = jugadorEnTurno.jugador && jugadorEnTurno.jugador.id === userId;
-    if (!esTurnoDelUsuario) {
+    const esAccionMulligan = accion === 'mulligan' || accion === 'confirmar_mano';
+    // Mulligan y confirmación se permiten para ambos jugadores al inicio, aun si no es su turno
+    if (!esTurnoDelUsuario && !esAccionMulligan) {
         return { success: false, status: 403, error: 'No es tu turno' };
+    }
+
+    // Bloquear cualquier acción distinta a mulligan/confirmar mientras el mulligan no esté cerrado para ambos
+    if (!gameState.estaMulliganCompletado() && !esAccionMulligan) {
+        return { success: false, status: 400, error: 'El mulligan no ha finalizado para ambos jugadores' };
     }
 
     // Ejecutar acción
@@ -1004,6 +1106,12 @@ GameController.prototype._ejecutarAccionInterna = async function (gameId, userId
             break;
         case 'pasar_turno':
             resultado = this._pasarTurno(gameState);
+            break;
+        case 'mulligan':
+            resultado = this._mulligan(gameState, userId);
+            break;
+        case 'confirmar_mano':
+            resultado = this._confirmarMano(gameState, userId);
             break;
         default:
             return { success: false, status: 400, error: `Acción no reconocida: ${accion}` };
@@ -1039,6 +1147,61 @@ GameController.prototype._ejecutarAccionInterna = async function (gameId, userId
         finalizado: !!ganador,
         ganador
     };
+};
+
+/**
+ * Crea una partida desde el lobby (sin Express)
+ */
+GameController.prototype.createGameForLobby = async function (player1Id, player2Id, deck1Id, deck2Id) {
+    try {
+        if (!player1Id || !player2Id) {
+            return { success: false, error: 'Jugadores requeridos' };
+        }
+        if (!deck1Id || !deck2Id) {
+            return { success: false, error: 'Decks requeridos' };
+        }
+
+        const mazo1 = this.deckRepo.buscarPorId(deck1Id);
+        const mazo2 = this.deckRepo.buscarPorId(deck2Id);
+
+        if (!mazo1) {
+            return { success: false, error: 'Mazo del jugador 1 no encontrado' };
+        }
+        if (!mazo2) {
+            return { success: false, error: 'Mazo del jugador 2 no encontrado' };
+        }
+
+        if (mazo1.usuario_id && mazo1.usuario_id !== player1Id && !mazo1.es_publico) {
+            return { success: false, error: 'El mazo del jugador 1 no pertenece al usuario' };
+        }
+        if (mazo2.usuario_id && mazo2.usuario_id !== player2Id && !mazo2.es_publico) {
+            return { success: false, error: 'El mazo del jugador 2 no pertenece al usuario' };
+        }
+
+        const gameState = this._inicializarPartida(mazo1, mazo2, player1Id, player2Id);
+        const partida = this.gameRepo.crearPartida({
+            jugador1_id: player1Id,
+            jugador2_id: player2Id,
+            mazo1_id: deck1Id,
+            mazo2_id: deck2Id,
+            estado_juego: gameState.toJSON()
+        });
+
+        return {
+            success: true,
+            data: {
+                partida,
+                gameState,
+                filteredStates: {
+                    [player1Id]: this._filtrarEstadoParaJugador(gameState, player1Id),
+                    [player2Id]: this._filtrarEstadoParaJugador(gameState, player2Id)
+                }
+            }
+        };
+    } catch (error) {
+        console.error('Error creando partida desde lobby:', error);
+        return { success: false, error: error.message };
+    }
 };
 
 GameController.prototype.obtenerEstadoParaJugador = function (gameId, userId) {

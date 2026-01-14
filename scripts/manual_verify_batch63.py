@@ -323,3 +323,8 @@ conn.commit()
 conn.close()
 print("Updated batch: hd15 y hd150-hd158")
 
+
+
+
+
+

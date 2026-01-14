@@ -306,3 +306,8 @@ conn.commit()
 conn.close()
 print("Updated batch: es96-es99 y hd1/hd10/hd100-hd103")
 
+
+
+
+
+

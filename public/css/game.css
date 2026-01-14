@@ -1,3 +1,231 @@
+.game-page {
+    min-height: 100vh;
+    background: #0f1624;
+    color: #e6e9ef;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    flex-direction: column;
+}
+
+.game-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: #111827;
+    border-bottom: 1px solid #1f2937;
+}
+
+.player-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.player-name {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.lp-badge {
+    background: #1f2937;
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-weight: 700;
+}
+
+.turn-info {
+    text-align: right;
+}
+
+.phase {
+    font-size: 0.9rem;
+    color: #9ca3af;
+}
+
+.board-grid {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 12px 16px;
+}
+
+.board-side {
+    background: #111827;
+    border: 1px solid #1f2937;
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.board-side.opponent {
+    border-color: #e74c3c;
+}
+
+.board-side.player {
+    border-color: #3498db;
+}
+
+.side-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 10px;
+}
+
+.zone-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 10px;
+}
+
+.zone {
+    background: #0b1020;
+    border: 1px dashed #1f2937;
+    border-radius: 8px;
+    padding: 8px;
+    min-height: 120px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.zone-title {
+    font-size: 0.85rem;
+    color: #9ca3af;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+    gap: 6px;
+}
+
+.cards-compact {
+    grid-template-columns: repeat(auto-fit, minmax(60px, 1fr));
+}
+
+.card-chip {
+    background: #1f2937;
+    border-radius: 6px;
+    padding: 6px;
+    font-size: 0.8rem;
+    text-align: center;
+    border: 1px solid #2d3748;
+}
+
+.hand {
+    background: #0b1020;
+    border-top: 1px solid #1f2937;
+    padding: 10px 12px;
+}
+
+.hand-title {
+    color: #9ca3af;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hand-count {
+    background: #1f2937;
+    border: 1px solid #2d3748;
+    border-radius: 10px;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: #e6e9ef;
+}
+
+.hand-cards {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 6px;
+}
+
+.card-pill {
+    background: #1f2937;
+    border-radius: 999px;
+    padding: 8px 12px;
+    white-space: nowrap;
+    cursor: pointer;
+    border: 1px solid #2d3748;
+    transition: background 0.2s;
+}
+
+.card-pill:hover {
+    background: #273043;
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+    padding: 10px 12px;
+    background: #111827;
+    border-top: 1px solid #1f2937;
+}
+
+.btn {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+}
+
+.btn-primary {
+    background: #2563eb;
+    color: #fff;
+}
+
+.btn-secondary {
+    background: #1f2937;
+    color: #e6e9ef;
+}
+
+.log {
+    max-height: 120px;
+    overflow-y: auto;
+    font-size: 0.85rem;
+    background: #0b1020;
+    border-top: 1px solid #1f2937;
+    padding: 8px 12px;
+}
+
+.message {
+    background: #1f2937;
+    color: #e6e9ef;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid #2d3748;
+    margin: 10px 12px;
+}
+
+.badge {
+    background: #1f2937;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid #2d3748;
+    font-size: 0.8rem;
+}
+
+@media (max-width: 900px) {
+    .row {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 600px) {
+    .row {
+        grid-template-columns: 1fr;
+    }
+    .actions {
+        flex-direction: column;
+    }
+}
 /* Estilos para el juego */
 
 body {
@@ -283,6 +511,11 @@ body {
     border: 2px dashed #bbb;
 }
 
+.card-placeholder.small {
+    width: 60px;
+    height: 80px;
+}
+
 /* Tarjeta de carta */
 .game-card {
     width: 80px;
@@ -291,7 +524,7 @@ body {
     border-radius: 8px;
     border: 2px solid #ddd;
     cursor: pointer;
-    transition: all 0.3s;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -300,12 +533,19 @@ body {
     font-size: 10px;
     text-align: center;
     padding: 5px;
+    will-change: transform, box-shadow, opacity;
 }
 
-.game-card:hover {
+.game-card:hover:not(.dragging) {
     transform: translateY(-5px) scale(1.05);
     box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
     z-index: 10;
+}
+
+.game-card.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg) scale(0.9);
+    cursor: grabbing;
 }
 
 .game-card.playable {
@@ -344,6 +584,14 @@ body {
 /* Zona miscelánea (cementerio, mazo) */
 .misc-zone {
     text-align: center;
+    background: #0b1020;
+    border: 1px dashed #1f2937;
+    border-radius: 8px;
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: center;
 }
 
 .misc-cards {
@@ -359,10 +607,14 @@ body {
     min-width: 100px;
 }
 
-.misc-card h5 {
-    margin: 0 0 10px 0;
+.misc-counter {
     font-size: 14px;
-    color: #666;
+    font-weight: 700;
+    color: #e6e9ef;
+    background: #1f2937;
+    border: 1px solid #2d3748;
+    border-radius: 8px;
+    padding: 4px 10px;
 }
 
 .card-count {
@@ -458,6 +710,186 @@ body {
     color: white;
 }
 
+/* Indicador de drop */
+.zone.drop-target {
+    border: 2px dashed #4CAF50;
+    background-color: rgba(76, 175, 80, 0.1);
+    animation: pulse-border 1s infinite;
+}
+
+@keyframes pulse-border {
+    0%, 100% { border-color: #4CAF50; }
+    50% { border-color: #81C784; }
+}
+
+/* Animaciones de cartas */
+.game-card.highlighted {
+    box-shadow: 0 0 20px #FFD700;
+    transform: scale(1.1);
+}
+
+.card-played {
+    animation: cardPlay 0.5s ease;
+}
+
+@keyframes cardPlay {
+    0% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.2) rotate(5deg);
+        opacity: 0.8;
+    }
+    100% {
+        transform: scale(1) rotate(0deg);
+        opacity: 1;
+    }
+}
+
+.card-damaged {
+    animation: takeDamage 0.5s ease;
+}
+
+@keyframes takeDamage {
+    0%, 100% { background-color: transparent; }
+    50% { background-color: rgba(255, 0, 0, 0.3); }
+}
+
+.game-over-message {
+    animation: fadeIn 0.5s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: scale(0.8); }
+    to { opacity: 1; transform: scale(1); }
+}
+
+/* Mensajes de feedback */
+.action-feedback {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 10px 20px;
+    border-radius: 5px;
+    color: white;
+    font-weight: bold;
+    z-index: 1000;
+    transition: opacity 0.3s, transform 0.3s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+}
+
+.action-feedback.info {
+    background-color: #2196F3;
+}
+
+.action-feedback.success {
+    background-color: #4CAF50;
+}
+
+.action-feedback.error {
+    background-color: #f44336;
+}
+
+/* Chat en partida */
+.game-chat-container {
+    position: fixed;
+    right: 20px;
+    bottom: 20px;
+    width: 300px;
+    max-height: 400px;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    display: flex;
+    flex-direction: column;
+    z-index: 100;
+}
+
+.game-chat-container.collapsed {
+    max-height: 40px;
+}
+
+.chat-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    background: #667eea;
+    color: white;
+    border-radius: 10px 10px 0 0;
+}
+
+.chat-header h4 {
+    margin: 0;
+    font-size: 1em;
+}
+
+.btn-icon {
+    background: transparent;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+}
+
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px;
+    max-height: 300px;
+}
+
+.chat-message {
+    margin-bottom: 10px;
+    padding: 8px;
+    background: #f5f5f5;
+    border-radius: 5px;
+}
+
+.chat-message.my-message {
+    background: #e3f2fd;
+    margin-left: 20px;
+}
+
+.chat-message-header {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8em;
+    color: #666;
+    margin-bottom: 5px;
+}
+
+.chat-username {
+    font-weight: bold;
+}
+
+.chat-message-text {
+    color: #333;
+}
+
+.chat-input-container {
+    display: flex;
+    gap: 5px;
+    padding: 10px;
+    border-top: 1px solid #e0e0e0;
+}
+
+.chat-input-container input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+}
+
+@media (max-width: 768px) {
+    .game-chat-container {
+        width: 250px;
+        max-height: 300px;
+    }
+}
+
 /* Responsive */
 @media (max-width: 1200px) {
     .game-card {
@@ -494,4 +926,10 @@ body {
         height: 70px;
     }
 }
+
+
+
+
+
+
 

@@ -310,3 +310,8 @@ conn.commit()
 conn.close()
 print("Updated batch: es532-es540")
 
+
+
+
+
+

@@ -22,3 +22,8 @@ console.log({ dbPath, tables_created: tables, tags_count: tags });
 db.close();
 
 
+
+
+
+
+

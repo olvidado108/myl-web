@@ -1,37 +1,24 @@
 const express = require('express');
-const router = express.Router();
 const GameController = require('../controllers/GameController');
 const { authenticateToken } = require('../middleware/auth');
+const router = express.Router();
 
-/**
- * POST /api/games
- * Crea una nueva partida
- */
-router.post('/', authenticateToken, GameController.createGame.bind(GameController));
+// Todas las rutas de juegos requieren autenticación
+router.use(authenticateToken);
 
-/**
- * GET /api/games/:id
- * Obtiene el estado de una partida
- */
-router.get('/:id', authenticateToken, GameController.getGame.bind(GameController));
+// Crear partida
+router.post('/', (req, res) => GameController.createGame(req, res));
 
-/**
- * POST /api/games/:id/actions
- * Realiza una acción en la partida
- */
-router.post('/:id/actions', authenticateToken, GameController.performAction.bind(GameController));
+// Obtener partida por ID
+router.get('/:id', (req, res) => GameController.getGame(req, res));
 
-/**
- * POST /api/games/:id/end
- * Finaliza una partida
- */
-router.post('/:id/end', authenticateToken, GameController.endGame.bind(GameController));
+// Listar partidas del usuario autenticado
+router.get('/', (req, res) => GameController.listGames(req, res));
 
-/**
- * GET /api/games
- * Lista las partidas del usuario
- */
-router.get('/', authenticateToken, GameController.listGames.bind(GameController));
+// Ejecutar acción en partida
+router.post('/:id/action', (req, res) => GameController.playAction(req, res));
+
+// Finalizar partida
+router.post('/:id/end', (req, res) => GameController.endGame(req, res));
 
 module.exports = router;
-

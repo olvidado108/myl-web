@@ -8,6 +8,8 @@
     "dev": "node server/server.js",
     "test": "node server/test/verify-setup.js",
     "verify": "node server/test/verify-setup.js",
+    "test:mulligan": "node server/test/mulligan-flow.js",
+    "test:all": "npm run verify && npm run test:mulligan",
     "ws:smoke": "node scripts/ws_smoketest.js"
   },
   "keywords": [

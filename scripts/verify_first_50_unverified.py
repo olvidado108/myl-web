@@ -34,3 +34,8 @@ print(f"Verificadas {len(ids)} cartas:", ", ".join(ids))
 conn.close()
 
 
+
+
+
+
+

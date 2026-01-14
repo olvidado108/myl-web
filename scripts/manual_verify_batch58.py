@@ -310,3 +310,8 @@ conn.commit()
 conn.close()
 print("Updated batch: hd104-hd112 y hd11")
 
+
+
+
+
+

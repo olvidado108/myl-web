@@ -47,6 +47,19 @@ class GameState {
                 recursosTotales: 0
             }
         };
+
+        // Conteo de mulligans por jugador (0 inicial)
+        this.mulligans = {
+            [jugador1Key]: 0,
+            [jugador2Key]: 0
+        };
+        // Indicador de si cada jugador ya confirmó su mano inicial
+        this.mulliganListo = {
+            [jugador1Key]: false,
+            [jugador2Key]: false
+        };
+        // Flag global: true solo cuando ambos jugadores confirmaron
+        this.mulliganCompletado = false;
         
         // Control de acciones por turno
         this.oroJugadoEnTurno = {
@@ -108,6 +121,17 @@ class GameState {
             return mapping;
         }
         return mapping ? [mapping] : [];
+    }
+
+    /**
+     * Retorna true si ambos jugadores ya confirmaron su mano de mulligan
+     */
+    estaMulliganCompletado() {
+        const jugadoresKeys = Object.keys(this.jugadores || {});
+        const listo = this.mulliganListo || {};
+        const completo = jugadoresKeys.length > 0 && jugadoresKeys.every(key => !!listo[key]);
+        this.mulliganCompletado = completo;
+        return completo;
     }
 
     /**
@@ -210,6 +234,9 @@ class GameState {
             jugadorInicialKey: this.jugadorInicialKey,
             oroJugadoEnTurno: this.oroJugadoEnTurno,
             roboInicialSaltado: this.roboInicialSaltado,
+            mulligans: this.mulligans,
+            mulliganListo: this.mulliganListo,
+            mulliganCompletado: this.mulliganCompletado,
             ganador: this.ganador,
             finalizado: this.finalizado
         };
