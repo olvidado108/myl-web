@@ -17,8 +17,7 @@ class CardRepositorySQLite {
         this.db.pragma('journal_mode = WAL');
         
         // Crear índices si no existen
-        this._crearIndices();
-        this._asegurarColumnaIsVerificada();
+        this._asegurarSchemaBasico();
         
         this.cargado = true;
     }
@@ -26,7 +25,51 @@ class CardRepositorySQLite {
     /**
      * Crea índices para mejorar el rendimiento de las búsquedas
      */
-    _crearIndices() {
+    _asegurarSchemaBasico() {
+        // Crear tabla cartas si no existe (esquema mínimo)
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS cartas (
+                id TEXT PRIMARY KEY,
+                nombre TEXT,
+                tipo TEXT,
+                raza TEXT,
+                edicion TEXT,
+                rareza TEXT,
+                ataque INTEGER,
+                defensa INTEGER,
+                fuerza INTEGER,
+                textoHabilidad TEXT,
+                abilities_json TEXT,
+                nombreNormalizado TEXT,
+                coste INTEGER,
+                is_verified INTEGER DEFAULT 0
+            );
+        `);
+
+        // Crear tabla tags si no existe (para relación)
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS tags (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                slug TEXT UNIQUE,
+                nombre TEXT,
+                categoria TEXT,
+                descripcion TEXT
+            );
+        `);
+
+        // Crear tabla carta_tags si no existe
+        this.db.exec(`
+            CREATE TABLE IF NOT EXISTS carta_tags (
+                carta_id TEXT,
+                tag_id INTEGER,
+                suggested INTEGER DEFAULT 0,
+                PRIMARY KEY (carta_id, tag_id),
+                FOREIGN KEY (carta_id) REFERENCES cartas(id),
+                FOREIGN KEY (tag_id) REFERENCES tags(id)
+            );
+        `);
+
+        // Índices básicos
         const indices = [
             'CREATE INDEX IF NOT EXISTS idx_tipo ON cartas(tipo)',
             'CREATE INDEX IF NOT EXISTS idx_raza ON cartas(raza)',
@@ -35,7 +78,7 @@ class CardRepositorySQLite {
             'CREATE INDEX IF NOT EXISTS idx_nombre_normalizado ON cartas(nombreNormalizado)',
             'CREATE INDEX IF NOT EXISTS idx_nombre ON cartas(nombre)'
         ];
-        
+
         indices.forEach(sql => {
             try {
                 this.db.exec(sql);
@@ -43,9 +86,11 @@ class CardRepositorySQLite {
                 console.warn(`Error creando índice: ${error.message}`);
             }
         });
-        
-        // Asegurar que la columna fuerza existe
+
+        // Asegurar columnas opcionales
         this._asegurarColumnaFuerza();
+        this._asegurarColumnaIsVerificada();
+        this._asegurarColumnaSuggested();
     }
 
     /**
