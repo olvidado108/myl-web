@@ -578,8 +578,29 @@ async function renderGameState() {
 
     // Habilitar/deshabilitar botones según el turno
     const actionsEnabled = isMyTurn && !currentGameState.finalizado && currentGameState.mulliganCompletado;
-    document.getElementById('passPhaseBtn').disabled = !actionsEnabled;
-    document.getElementById('passTurnBtn').disabled = !actionsEnabled || currentGameState.fase !== 'final';
+    
+    // Re-configurar event listeners y estado de botones
+    const passPhaseBtn = document.getElementById('passPhaseBtn');
+    if (passPhaseBtn) {
+        passPhaseBtn.onclick = () => {
+            console.log('⏭️ Click pasar fase');
+            performAction('pasar_fase', {});
+        };
+        passPhaseBtn.disabled = !actionsEnabled;
+    } else {
+        console.warn('⚠️ Botón passPhaseBtn no encontrado');
+    }
+    
+    const passTurnBtn = document.getElementById('passTurnBtn');
+    if (passTurnBtn) {
+        passTurnBtn.onclick = () => {
+            console.log('⏭️ Click pasar turno');
+            performAction('pasar_turno', {});
+        };
+        passTurnBtn.disabled = !actionsEnabled || currentGameState.fase !== 'final';
+    } else {
+        console.warn('⚠️ Botón passTurnBtn no encontrado');
+    }
 
     // Mostrar mensaje si la partida terminó
     if (currentGameState.finalizado) {
