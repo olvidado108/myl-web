@@ -29,12 +29,21 @@ if (!fs.existsSync(USERS_DB_PATH)) {
     process.exit(1);
 }
 
-// Si game.db ya existe, hacer backup
+// Si game.db ya existe, hacer backup y eliminar
 if (fs.existsSync(NEW_DB_PATH)) {
     const backupPath = `${NEW_DB_PATH}.backup.${Date.now()}`;
     console.log(`⚠️  game.db ya existe. Creando backup: ${backupPath}`);
     fs.copyFileSync(NEW_DB_PATH, backupPath);
-    console.log(`✅ Backup creado\n`);
+    console.log(`✅ Backup creado`);
+    // Eliminar BD y archivos relacionados para recrear desde cero
+    try {
+        fs.unlinkSync(NEW_DB_PATH);
+        fs.unlinkSync(`${NEW_DB_PATH}-shm`);
+        fs.unlinkSync(`${NEW_DB_PATH}-wal`);
+    } catch (e) {
+        // Ignorar errores si no existen
+    }
+    console.log(`🗑️  BD anterior eliminada para recrear desde cero\n`);
 }
 
 try {
@@ -58,8 +67,18 @@ try {
     `).get();
     
     if (cartasSchema) {
+        // Eliminar tabla si existe (para permitir re-migración)
+        try {
+            newDb.exec('DROP TABLE IF EXISTS cartas');
+            console.log('   🗑️  Tabla cartas eliminada (si existía)');
+        } catch (e) {
+            console.warn(`   ⚠️  Error eliminando tabla: ${e.message}`);
+        }
+        // Modificar el SQL para asegurar que no tenga IF NOT EXISTS
+        let createSql = cartasSchema.sql;
+        createSql = createSql.replace(/IF NOT EXISTS/gi, '');
         // Crear tabla cartas en la nueva BD
-        newDb.exec(cartasSchema.sql);
+        newDb.exec(createSql);
         console.log('   ✅ Tabla cartas creada');
         
         // Copiar datos

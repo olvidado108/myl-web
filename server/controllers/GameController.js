@@ -255,9 +255,20 @@ class GameController {
         // Procesar habilidades de las cartas iniciales
         this._procesarHabilidadesCartas(mano1.concat(mano2).concat(oroInicial1 ? [oroInicial1] : []).concat(oroInicial2 ? [oroInicial2] : []));
 
-        // Ajustar estado inicial: el primer jugador comienza en Reagrupar
-        gameState.fase = 'reagrupar';
-        this._aplicarFaseReagrupar(gameState);
+        // Ajustar estado inicial: 
+        // - En el primer turno del jugador inicial, NO hay fase de Reagrupar, va directo a Comienzo de Vigilia
+        // - A partir del primer turno del segundo jugador, SÍ hay fase de Reagrupar
+        const esPrimerTurnoDelInicial = gameState.turnoNumero === 1 && 
+                                        gameState.turnoActual === gameState.getJugadorInicialKey();
+        
+        if (esPrimerTurnoDelInicial) {
+            // Primer turno del jugador inicial: saltar Reagrupar, ir directo a Comienzo de Vigilia
+            gameState.fase = 'comienzo_vigilia';
+        } else {
+            // Todos los demás turnos (incluyendo primer turno del segundo jugador): empezar en Reagrupar
+            gameState.fase = 'reagrupar';
+            this._aplicarFaseReagrupar(gameState);
+        }
 
         return gameState;
     }
@@ -443,8 +454,8 @@ class GameController {
         if (estadoJson) {
             // Copiar propiedades del estado guardado
             gameState.turnoActual = estadoJson.turnoActual || jugador1Id;
-            gameState.fase = estadoJson.fase || 'reagrupar';
             gameState.turnoNumero = estadoJson.turnoNumero || 1;
+            gameState.fase = estadoJson.fase || 'reagrupar'; // Cargar fase desde estado guardado
             gameState.ganador = estadoJson.ganador || null;
             gameState.finalizado = estadoJson.finalizado || false;
             gameState.jugadorInicialKey = estadoJson.jugadorInicialKey || gameState.jugadorInicialKey;
@@ -482,6 +493,43 @@ class GameController {
         if (!this.abilityManager) {
             this.abilityManager = new AbilityManager(gameState);
         }
+
+        // Ajustar fase si es necesario (corregir juegos guardados antes del cambio)
+        // - En el primer turno del jugador inicial, NO hay fase de Reagrupar, va directo a Comienzo de Vigilia
+        // - A partir del primer turno del segundo jugador, SÍ hay fase de Reagrupar
+        const esPrimerTurnoDelInicial = gameState.turnoNumero === 1 && 
+                                        gameState.turnoActual === gameState.getJugadorInicialKey();
+        
+        console.log(`🔍 Ajustando fase en _cargarGameState:`, {
+            turnoNumero: gameState.turnoNumero,
+            turnoActual: gameState.turnoActual,
+            jugadorInicialKey: gameState.getJugadorInicialKey(),
+            faseActual: gameState.fase,
+            esPrimerTurnoDelInicial
+        });
+        
+        if (esPrimerTurnoDelInicial && gameState.fase === 'reagrupar') {
+            // Corregir: primer turno del jugador inicial debe estar en Comienzo de Vigilia, no Reagrupar
+            console.log(`✅ Corrigiendo fase: primer turno del inicial, cambiando de 'reagrupar' a 'comienzo_vigilia'`);
+            gameState.fase = 'comienzo_vigilia';
+        } else if (!esPrimerTurnoDelInicial && gameState.fase === 'comienzo_vigilia' && gameState.turnoNumero === 1) {
+            // Si es el primer turno del segundo jugador, debe estar en Reagrupar
+            console.log(`✅ Corrigiendo fase: primer turno del segundo jugador, cambiando a 'reagrupar'`);
+            gameState.fase = 'reagrupar';
+            this._aplicarFaseReagrupar(gameState);
+        } else if (!gameState.fase) {
+            // Si no hay fase definida, aplicar lógica por defecto
+            if (esPrimerTurnoDelInicial) {
+                console.log(`✅ Estableciendo fase por defecto: primer turno del inicial -> 'comienzo_vigilia'`);
+                gameState.fase = 'comienzo_vigilia';
+            } else {
+                console.log(`✅ Estableciendo fase por defecto: otros turnos -> 'reagrupar'`);
+                gameState.fase = 'reagrupar';
+                this._aplicarFaseReagrupar(gameState);
+            }
+        }
+        
+        console.log(`✅ Fase final después de ajuste: ${gameState.fase}`);
 
         return gameState;
     }
