@@ -325,6 +325,8 @@ function initGameSocket(httpServer) {
                     const starterId = state.starter;
                     const starterKey = gameState.getKeyPorId(starterId) || gameState.turnoActual;
                     gameState.turnoActual = starterKey;
+                    gameState.jugadorInicialKey = starterKey;
+                    gameState.turnoNumero = 1;
                     // Guardar en BD
                     GameController.gameRepo.actualizarPartida(gameId, {
                         estado_juego: gameState.toJSON()

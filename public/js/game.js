@@ -435,6 +435,13 @@ async function renderGameState() {
     console.log('🔍 myPlayerKey seleccionado:', myPlayerKey);
     console.log('🔍 opponentPlayerKey seleccionado:', opponentPlayerKey);
 
+    const starterLabel = document.getElementById('starterStatus');
+    if (starterLabel) {
+        const starterKey = currentGameState.jugadorInicialKey || currentGameState.turnoActual;
+        const starterIsMe = starterKey === myPlayerKey;
+        starterLabel.textContent = starterIsMe ? 'Empiezas tú' : 'Empieza el oponente';
+    }
+
     const myState = currentGameState.jugadores[myPlayerKey];
     const opponentState = currentGameState.jugadores[opponentPlayerKey];
     if (!myState || !opponentState) {
@@ -530,6 +537,21 @@ async function renderGameState() {
         };
         confirmHandBtn.disabled = !canConfirmHand;
         confirmHandBtn.textContent = estoyListo ? 'Listo ✓' : 'Confirmar mano';
+    }
+
+    // Mostrar estado de mulligan para ambos jugadores
+    const statusEl = document.getElementById('mulliganStatus');
+    if (statusEl) {
+        const opponentReady = opponentPlayerKey ? !!mulliganListo[opponentPlayerKey] : false;
+        const lines = [];
+        lines.push(estoyListo ? 'Tú: Listo' : 'Tú: Mulligan en curso');
+        lines.push(opponentReady ? 'Oponente: Listo' : 'Oponente: Mulligan en curso');
+        if (!mulliganCompletado) {
+            lines.push('El juego comenzará cuando ambos confirmen su mano.');
+        } else {
+            lines.push('Mulligan completado. ¡Puedes jugar!');
+        }
+        statusEl.textContent = lines.join(' | ');
     }
 
     // Si la mano aparece vacía después de un mulligan, intentar resincronizar estado (fallback)
@@ -897,6 +919,12 @@ async function performAction(accion, datos) {
         return;
     }
 
+    // Evitar acciones de juego si mulligan no está completo (seguridad en UI)
+    if (accion !== 'mulligan' && accion !== 'confirmar_mano' && currentGameState && !currentGameState.mulliganCompletado) {
+        showMessage('Aún no termina el mulligan de ambos jugadores', 'info');
+        return;
+    }
+
     console.log('➡️ performAction (solo WS)', { accion, datos, gameId: currentGameId, hasSocket: !!gameSocket, socketConnected: gameSocket?.connected, version: GAME_JS_VERSION });
 
     if (gameSocket && gameSocket.connected) {
@@ -930,6 +958,17 @@ async function confirmHand() {
     console.log('✅ Confirmando mano...');
     showActionFeedback('Confirmando mano...', 'info');
     await performAction('confirmar_mano', {});
+}
+
+/**
+ * Muestra feedback rápido si se intenta actuar antes de terminar mulligan
+ */
+function ensureMulliganReady() {
+    if (currentGameState && !currentGameState.mulliganCompletado) {
+        showMessage('Esperando a que ambos confirmen el mulligan', 'info');
+        return false;
+    }
+    return true;
 }
 
 /**

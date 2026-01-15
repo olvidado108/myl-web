@@ -90,6 +90,30 @@ async function runTests() {
     const r5 = await controller._ejecutarAccionInterna(gameId, 'p1', 'pasar_fase', {});
     assert('Permite pasar_fase tras mulligan completado', r5.success === true);
 
+    // 6) Segundo mulligan del mismo jugador reduce a 6 cartas
+    const gs2 = new GameState('p1', 'p2');
+    gs2.jugadores[gs2.getKeyPorId('p1')].mano = Array.from({ length: 8 }, (_, i) => `a${i + 1}`);
+    gs2.jugadores[gs2.getKeyPorId('p1')].mazo = Array.from({ length: 40 }, (_, i) => `b${i + 1}`);
+    gs2.jugadores[gs2.getKeyPorId('p2')].mano = Array.from({ length: 8 }, (_, i) => `c${i + 1}`);
+    gs2.jugadores[gs2.getKeyPorId('p2')].mazo = Array.from({ length: 40 }, (_, i) => `d${i + 1}`);
+    const { controller: c2, gameId: g2 } = createStubbedController(gs2);
+    await c2._ejecutarAccionInterna(g2, 'p1', 'mulligan', {}); // a 7
+    const r6 = await c2._ejecutarAccionInterna(g2, 'p1', 'mulligan', {}); // a 6
+    assert('Segundo mulligan reduce a 6', r6.resultado?.mensaje?.includes('6 cartas'));
+
+    // 7) Ambos mulligan y luego confirman
+    const gs3 = new GameState('p1', 'p2');
+    gs3.jugadores[gs3.getKeyPorId('p1')].mano = Array.from({ length: 8 }, (_, i) => `x${i + 1}`);
+    gs3.jugadores[gs3.getKeyPorId('p1')].mazo = Array.from({ length: 40 }, (_, i) => `y${i + 1}`);
+    gs3.jugadores[gs3.getKeyPorId('p2')].mano = Array.from({ length: 8 }, (_, i) => `z${i + 1}`);
+    gs3.jugadores[gs3.getKeyPorId('p2')].mazo = Array.from({ length: 40 }, (_, i) => `w${i + 1}`);
+    const { controller: c3, gameId: g3 } = createStubbedController(gs3);
+    await c3._ejecutarAccionInterna(g3, 'p1', 'mulligan', {});
+    await c3._ejecutarAccionInterna(g3, 'p2', 'mulligan', {});
+    const r7a = await c3._ejecutarAccionInterna(g3, 'p1', 'confirmar_mano', {});
+    const r7b = await c3._ejecutarAccionInterna(g3, 'p2', 'confirmar_mano', {});
+    assert('Ambos mulligan luego confirman completa', r7b.gameState.mulliganCompletado === true && r7a.success && r7b.success);
+
     console.log('\n' + '='.repeat(50));
     console.log(`📊 Resumen: ${passed} exitosas, ${failed} fallidas`);
     if (failed > 0) {
