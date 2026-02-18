@@ -638,14 +638,82 @@ class GameController {
             return { exito: false, error: 'Solo puedes jugar un Oro por turno' };
         }
 
-        // Verificar recursos (los oros no tienen coste)
-        if (!esOro && jugador.recursos < carta.coste) {
-            return { exito: false, error: 'No tienes suficientes recursos' };
-        }
-
-        // Pagar coste si aplica
+        // Verificar recursos y obtener oros a usar para pagar
+        let orosUsadosParaPagar = [];
         if (!esOro) {
-            jugador.recursos -= carta.coste;
+            // Obtener los oros a usar del payload (si se especificaron)
+            orosUsadosParaPagar = datos.orosUsados || [];
+            
+            // Validar que se hayan especificado oros suficientes
+            if (orosUsadosParaPagar.length < carta.coste) {
+                // Si no se especificaron oros, buscar disponibles automáticamente
+                const orosDisponibles = gameState.getOrosDisponibles(jugadorKey);
+                if (orosDisponibles.length < carta.coste) {
+                    return { 
+                        exito: false, 
+                        error: 'No tienes suficientes oros disponibles',
+                        requiereSeleccionOros: true,
+                        orosDisponibles: orosDisponibles,
+                        coste: carta.coste
+                    };
+                }
+                // Si no se especificaron, usar los primeros disponibles
+                if (orosUsadosParaPagar.length === 0) {
+                    orosUsadosParaPagar = orosDisponibles.slice(0, carta.coste);
+                }
+            }
+
+            // Verificar que todos los oros especificados estén disponibles
+            const orosDisponibles = gameState.getOrosDisponibles(jugadorKey);
+            for (const oroId of orosUsadosParaPagar) {
+                if (!orosDisponibles.includes(oroId)) {
+                    return { 
+                        exito: false, 
+                        error: `El oro ${oroId} no está disponible para usar`,
+                        requiereSeleccionOros: true,
+                        orosDisponibles: orosDisponibles,
+                        coste: carta.coste
+                    };
+                }
+            }
+
+            // Usar los oros especificados (marcarlos como usados)
+            if (!gameState.usarOros(jugadorKey, orosUsadosParaPagar)) {
+                return { 
+                    exito: false, 
+                    error: 'No se pudieron usar los oros especificados',
+                    requiereSeleccionOros: true,
+                    orosDisponibles: gameState.getOrosDisponibles(jugadorKey),
+                    coste: carta.coste
+                };
+            }
+
+            // Activar habilidades de los oros usados para pagar
+            for (const oroId of orosUsadosParaPagar) {
+                const oroData = this.cardRepo.buscarPorId(oroId);
+                if (oroData) {
+                    const oro = Carta.fromJSON(oroData);
+                    oro.processAbilities(this.abilityManager);
+                    
+                    // Buscar habilidades que se activen al usarse para pagar
+                    // Por ahora, activaremos habilidades "activatable" o "mana_ability"
+                    const abilitiesToActivate = oro.getAbilitiesByTrigger('activatable') || 
+                                                oro.getAbilitiesByTrigger('mana_ability') || 
+                                                [];
+                    
+                    // Si el oro tiene una habilidad que se activa al usarse, ejecutarla
+                    if (this.abilityManager && abilitiesToActivate.length > 0) {
+                        abilitiesToActivate.forEach(ability => {
+                            this.abilityManager.execute(ability, {
+                                card: oro,
+                                player: jugadorKey,
+                                gameState: gameState,
+                                context: 'used_for_payment'
+                            });
+                        });
+                    }
+                }
+            }
         }
 
         // Remover de la mano
@@ -779,6 +847,7 @@ class GameController {
 
     /**
      * Aplica los efectos obligatorios de la fase de Reagrupar
+     * - Libera los oros usados (vuelven a estar disponibles)
      * - Recupera recursos según la cantidad de Oros
      * - Devuelve los aliados que atacaron a la Línea de Defensa
      * - Resetea el control de oro jugado en el turno
@@ -789,6 +858,9 @@ class GameController {
             return { exito: false, error: 'Jugador no encontrado en Reagrupar' };
         }
 
+        // Liberar oros usados (vuelven a estar disponibles)
+        gameState.liberarOrosUsados(key);
+
         // Devolver aliados de ataque a defensa
         if (!Array.isArray(jugador.lineaAtaque)) {
             jugador.lineaAtaque = [];
@@ -798,7 +870,7 @@ class GameController {
             jugador.lineaAtaque = [];
         }
 
-        // Recuperar recursos
+        // Recuperar recursos (ya calculado por liberarOrosUsados)
         gameState.calcularRecursosTotales(key);
 
         // Permitir jugar un oro nuevamente

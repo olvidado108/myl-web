@@ -250,17 +250,13 @@ func _animate_hover(hovering: bool) -> void:
 	z_index = 20 if hovering else 0
 
 func _update_pivot() -> void:
-	pivot_offset = Vector2(size.x * 0.5, size.y)
-
-func _find_scroll_container() -> ScrollContainer:
+	pivot_offset = Vector2(size.x * 0.5, size.y)func _find_scroll_container() -> ScrollContainer:
 	var node := get_parent()
 	while node:
 		if node is ScrollContainer:
 			return node
 		node = node.get_parent()
-	return null
-
-func _compute_hover_offset(scale_val: float) -> Vector2:
+	return nullfunc _compute_hover_offset(scale_val: float) -> Vector2:
 	var vp := get_viewport()
 	if vp == null:
 		return Vector2.ZERO

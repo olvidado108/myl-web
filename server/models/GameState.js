@@ -27,7 +27,8 @@ class GameState {
                 lineaDefensa: [], // Aliados en defensa
                 lineaAtaque: [], // Aliados que declararon ataque este turno
                 lineaApoyo: [], // Tótems y Armas
-                reservaOro: [], // Oros (generan recursos)
+                reservaOro: [], // Oros disponibles (generan recursos)
+                oroPagado: [], // Oros usados/girados este turno (en fase de Reagrupar vuelven a reservaOro)
                 cementerio: [], // Cartas descartadas/destruidas
                 // Recursos (generados por Oros, no "maná" tradicional)
                 recursos: 0, // Recursos disponibles este turno
@@ -42,6 +43,7 @@ class GameState {
                 lineaAtaque: [],
                 lineaApoyo: [],
                 reservaOro: [],
+                oroPagado: [],
                 cementerio: [],
                 recursos: 0,
                 recursosTotales: 0
@@ -213,13 +215,80 @@ class GameState {
 
     /**
      * Calcula los recursos totales generados por los Oros
+     * Solo cuenta los oros que están en reservaOro (no en oroPagado)
      */
     calcularRecursosTotales(jugadorId) {
         const jugador = this.jugadores[jugadorId];
-        // Cada Oro genera 1 recurso (puede ajustarse según la carta)
+        if (!jugador) return 0;
+        
+        // Cada Oro en reservaOro genera 1 recurso disponible
         jugador.recursosTotales = jugador.reservaOro.length;
-        jugador.recursos = jugador.recursosTotales;
+        jugador.recursos = jugador.reservaOro.length;
         return jugador.recursos;
+    }
+
+    /**
+     * Usa oros específicos para pagar (los mueve de reservaOro a oroPagado)
+     * @param {string} jugadorId - ID del jugador
+     * @param {string[]} orosIds - Array de IDs de oros a usar
+     * @returns {boolean} - true si todos los oros pudieron usarse
+     */
+    usarOros(jugadorId, orosIds) {
+        const jugador = this.jugadores[jugadorId];
+        if (!jugador) return false;
+
+        // Verificar que todos los oros estén en la reserva
+        for (const oroId of orosIds) {
+            if (!jugador.reservaOro.includes(oroId)) {
+                return false; // El oro no está en la reserva
+            }
+            if (jugador.oroPagado.includes(oroId)) {
+                return false; // El oro ya está usado
+            }
+        }
+
+        // Mover los oros de reservaOro a oroPagado
+        for (const oroId of orosIds) {
+            const index = jugador.reservaOro.indexOf(oroId);
+            if (index > -1) {
+                jugador.reservaOro.splice(index, 1);
+                jugador.oroPagado.push(oroId);
+            }
+        }
+
+        this.calcularRecursosTotales(jugadorId);
+        return true;
+    }
+
+    /**
+     * Libera todos los oros usados (en la fase de Reagrupar)
+     * Mueve los oros de oroPagado de vuelta a reservaOro
+     * @param {string} jugadorId - ID del jugador
+     */
+    liberarOrosUsados(jugadorId) {
+        const jugador = this.jugadores[jugadorId];
+        if (!jugador) return;
+        
+        // Mover todos los oros de oroPagado de vuelta a reservaOro
+        if (jugador.oroPagado && jugador.oroPagado.length > 0) {
+            jugador.reservaOro.push(...jugador.oroPagado);
+            jugador.oroPagado = [];
+        }
+        
+        this.calcularRecursosTotales(jugadorId);
+    }
+
+    /**
+     * Obtiene los oros disponibles (en reservaOro, no en oroPagado) de un jugador
+     * @param {string} jugadorId - ID del jugador
+     * @returns {string[]} - Array de IDs de oros disponibles
+     */
+    getOrosDisponibles(jugadorId) {
+        const jugador = this.jugadores[jugadorId];
+        if (!jugador) return [];
+        
+        // Los oros disponibles son los que están en reservaOro
+        return [...jugador.reservaOro];
     }
 
     /**

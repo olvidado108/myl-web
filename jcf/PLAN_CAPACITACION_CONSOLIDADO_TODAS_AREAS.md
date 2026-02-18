@@ -84,3 +84,5 @@ Capacidad de movimiento entre diferentes áreas de trabajo. Buena coordinación 
 
 
 
+
+
