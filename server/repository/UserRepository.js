@@ -4,7 +4,7 @@ const path = require('path');
 
 class UserRepository {
     constructor(dbPath = null) {
-        const defaultPath = path.join(__dirname, '..', 'data', 'game.db');
+        const defaultPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'game.db');
         this.dbPath = dbPath || defaultPath;
         this.db = new Database(this.dbPath);
         this.db.pragma('journal_mode = WAL');
