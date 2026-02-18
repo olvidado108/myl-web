@@ -485,8 +485,7 @@ async function renderGameState() {
 
     const playerOroPagadoEl = document.getElementById('playerOroPagadoCount');
     if (playerOroPagadoEl) {
-        const usados = (myState.recursosTotales ?? 0) - (myState.recursos ?? 0);
-        playerOroPagadoEl.textContent = usados >= 0 ? usados : '--';
+        playerOroPagadoEl.textContent = Array.isArray(myState.oroPagado) ? myState.oroPagado.length : '--';
     }
 
     const opponentDeckEl = document.getElementById('opponentDeckCount');
@@ -506,8 +505,7 @@ async function renderGameState() {
 
     const opponentOroPagadoEl = document.getElementById('opponentOroPagadoCount');
     if (opponentOroPagadoEl) {
-        const usados = (opponentState.recursosTotales ?? 0) - (opponentState.recursos ?? 0);
-        opponentOroPagadoEl.textContent = usados >= 0 ? usados : '--';
+        opponentOroPagadoEl.textContent = Array.isArray(opponentState.oroPagado) ? opponentState.oroPagado.length : '--';
     }
 
     // Estado de mulligan
@@ -578,8 +576,29 @@ async function renderGameState() {
 
     // Habilitar/deshabilitar botones según el turno
     const actionsEnabled = isMyTurn && !currentGameState.finalizado && currentGameState.mulliganCompletado;
-    document.getElementById('passPhaseBtn').disabled = !actionsEnabled;
-    document.getElementById('passTurnBtn').disabled = !actionsEnabled || currentGameState.fase !== 'final';
+    
+    // Re-configurar event listeners y estado de botones
+    const passPhaseBtn = document.getElementById('passPhaseBtn');
+    if (passPhaseBtn) {
+        passPhaseBtn.onclick = () => {
+            console.log('⏭️ Click pasar fase');
+            performAction('pasar_fase', {});
+        };
+        passPhaseBtn.disabled = !actionsEnabled;
+    } else {
+        console.warn('⚠️ Botón passPhaseBtn no encontrado');
+    }
+    
+    const passTurnBtn = document.getElementById('passTurnBtn');
+    if (passTurnBtn) {
+        passTurnBtn.onclick = () => {
+            console.log('⏭️ Click pasar turno');
+            performAction('pasar_turno', {});
+        };
+        passTurnBtn.disabled = !actionsEnabled || currentGameState.fase !== 'final';
+    } else {
+        console.warn('⚠️ Botón passTurnBtn no encontrado');
+    }
 
     // Mostrar mensaje si la partida terminó
     if (currentGameState.finalizado) {
@@ -595,6 +614,11 @@ async function renderGameState() {
  * Mapea un prefijo de jugador y tipo de zona al ID del contenedor en el DOM
  */
 function getZoneContainerId(prefix, zoneType) {
+    // Mapeo especial para oro-pagado
+    if (zoneType === 'oro-pagado') {
+        return prefix === 'player' ? 'me-oro-pagado' : 'opp-oro-pagado';
+    }
+    
     const map = {
         player: {
             hand: 'hand',
@@ -632,6 +656,9 @@ async function renderPlayerState(playerState, prefix, isMyTurn) {
     
     // Reserva de Oro
     await renderZone(playerState.reservaOro, getZoneContainerId(prefix, 'oro'), 'oro', isMyTurn);
+    
+    // Oro Pagado
+    await renderZone(playerState.oroPagado || [], getZoneContainerId(prefix, 'oro-pagado'), 'oro-pagado', isMyTurn);
 }
 
 /**
@@ -649,10 +676,18 @@ async function renderOpponentState(opponentState, prefix, isMyTurn) {
     
     // Reserva de Oro
     await renderZone(opponentState.reservaOro, getZoneContainerId(prefix, 'oro'), 'oro', isMyTurn);
+    
+    // Oro Pagado
+    await renderZone(opponentState.oroPagado || [], getZoneContainerId(prefix, 'oro-pagado'), 'oro-pagado', isMyTurn);
 }
 
 /**
  * Renderiza una zona de cartas
+ * @param {string[]} cardIds - IDs de las cartas a renderizar
+ * @param {string} containerId - ID del contenedor HTML
+ * @param {string} zoneType - Tipo de zona (oro, mano, defensa, etc.)
+ * @param {boolean} isMyTurn - Si es el turno del jugador
+ * @param {boolean} isOpponentDefense - Si es la defensa del oponente
  */
 async function renderZone(cardIds, containerId, zoneType, isMyTurn, isOpponentDefense = false) {
     const container = document.getElementById(containerId);
@@ -693,7 +728,9 @@ async function renderZone(cardIds, containerId, zoneType, isMyTurn, isOpponentDe
         }
 
         console.log(`✅ Carta ${cardId} cargada, creando elemento...`);
-        const cardElement = createCardElement(card, zoneType, isMyTurn, isOpponentDefense);
+        // Para oros pagados, marcarlos visualmente como usados
+        const isOroPagado = zoneType === 'oro-pagado';
+        const cardElement = createCardElement(card, zoneType, isMyTurn, isOpponentDefense, isOroPagado);
         console.log(`✅ Elemento creado para carta ${cardId}, agregando al contenedor...`);
         container.appendChild(cardElement);
         cardsRendered++;
@@ -781,8 +818,13 @@ function canPlayCardInZone(cardId, zoneType, sourceZone = 'hand', zoneOwner = 'p
 
 /**
  * Crea un elemento HTML para una carta
+ * @param {Object} card - Datos de la carta
+ * @param {string} zoneType - Tipo de zona donde está la carta
+ * @param {boolean} isMyTurn - Si es el turno del jugador
+ * @param {boolean} isOpponentDefense - Si es la defensa del oponente
+ * @param {boolean} isOroUsado - Si es un oro y está usado/girado (solo para zona oro)
  */
-function createCardElement(card, zoneType, isMyTurn, isOpponentDefense = false) {
+function createCardElement(card, zoneType, isMyTurn, isOpponentDefense = false, isOroUsado = false) {
     try {
         const div = document.createElement('div');
         div.className = 'game-card';
@@ -830,6 +872,18 @@ function createCardElement(card, zoneType, isMyTurn, isOpponentDefense = false) 
         if (card.coste !== undefined) infoText += ` [${card.coste}]`;
         info.textContent = infoText;
         div.appendChild(info);
+
+        // Si es un oro pagado, mostrar visualmente que está usado/girado
+        if (isOroUsado || zoneType === 'oro-pagado') {
+            div.classList.add('oro-usado');
+            div.title = `${card.nombre} (Usado/Girado - En Oro Pagado)`;
+            // Agregar indicador visual
+            const usadoBadge = document.createElement('div');
+            usadoBadge.className = 'oro-usado-badge';
+            usadoBadge.textContent = '✓';
+            usadoBadge.title = 'Oro usado/girado';
+            div.appendChild(usadoBadge);
+        }
 
         // Agregar funcionalidad según la zona y si es mi turno
         if (isMyTurn) {
@@ -977,20 +1031,198 @@ function ensureMulliganReady() {
 async function playCardToZone(cardId, zoneType) {
     if (!cardId) return;
 
-    showActionFeedback('Jugando carta...', 'info');
-    highlightCard(cardId, 800);
-
-    // Animación rápida a la carta en mano
-    const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
-    if (cardEl) {
-        cardEl.classList.add('card-played');
-        setTimeout(() => cardEl.classList.remove('card-played'), 600);
+    const card = await getCardData(cardId);
+    if (!card) {
+        showError('No se pudo cargar la carta');
+        return;
     }
 
-    await performAction('jugar_carta', {
-        carta_id: cardId,
-        objetivo_id: null,
-        zona: zoneType
+    // Si la carta tiene coste > 0 y no es un Oro, solicitar selección de oros
+    if (card.coste > 0 && card.tipo !== 'Oro') {
+        const myState = currentGameState.jugadores[myPlayerKey];
+        if (!myState) {
+            showError('No se pudo obtener tu estado');
+            return;
+        }
+
+        // Obtener oros disponibles (en reservaOro, no en oroPagado)
+        const orosDisponibles = myState.reservaOro || [];
+
+        if (orosDisponibles.length < card.coste) {
+            showError(`No tienes suficientes oros disponibles (necesitas ${card.coste}, tienes ${orosDisponibles.length})`);
+            return;
+        }
+
+        // Mostrar modal de selección de oros
+        const orosSeleccionados = await showSelectOrosModal(card, orosDisponibles, card.coste);
+        if (!orosSeleccionados || orosSeleccionados.length !== card.coste) {
+            // El usuario canceló o no seleccionó suficientes
+            return;
+        }
+
+        // Jugar la carta con los oros seleccionados
+        showActionFeedback('Jugando carta...', 'info');
+        highlightCard(cardId, 800);
+
+        const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+        if (cardEl) {
+            cardEl.classList.add('card-played');
+            setTimeout(() => cardEl.classList.remove('card-played'), 600);
+        }
+
+        await performAction('jugar_carta', {
+            carta_id: cardId,
+            objetivo_id: null,
+            zona: zoneType,
+            orosUsados: orosSeleccionados
+        });
+    } else {
+        // Carta sin coste o es un Oro, jugar directamente
+        showActionFeedback('Jugando carta...', 'info');
+        highlightCard(cardId, 800);
+
+        const cardEl = document.querySelector(`[data-card-id="${cardId}"]`);
+        if (cardEl) {
+            cardEl.classList.add('card-played');
+            setTimeout(() => cardEl.classList.remove('card-played'), 600);
+        }
+
+        await performAction('jugar_carta', {
+            carta_id: cardId,
+            objetivo_id: null,
+            zona: zoneType
+        });
+    }
+}
+
+/**
+ * Muestra un modal para seleccionar qué oros usar para pagar una carta
+ * @param {Object} card - La carta que se va a jugar
+ * @param {string[]} orosDisponibles - Array de IDs de oros disponibles
+ * @param {number} coste - Coste de la carta (cantidad de oros necesarios)
+ * @returns {Promise<string[]>} - Array de IDs de oros seleccionados, o null si se canceló
+ */
+function showSelectOrosModal(card, orosDisponibles, coste) {
+    return new Promise((resolve) => {
+        // Crear o obtener el modal
+        let modal = document.getElementById('selectOrosModal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'selectOrosModal';
+            modal.className = 'modal';
+            modal.innerHTML = `
+                <div class="modal-content">
+                    <h3>Selecciona los oros para pagar</h3>
+                    <p class="select-oros-info">Selecciona <span id="orosNeeded">${coste}</span> oro(s) para jugar <strong>${card.nombre}</strong></p>
+                    <div id="orosOptions" class="oros-options"></div>
+                    <div class="modal-actions">
+                        <button id="confirmOrosBtn" class="btn btn-primary" disabled>Confirmar</button>
+                        <button id="cancelOrosBtn" class="btn btn-secondary">Cancelar</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+        }
+
+        // Limpiar selección anterior
+        const orosOptions = document.getElementById('orosOptions');
+        const orosNeeded = document.getElementById('orosNeeded');
+        const confirmBtn = document.getElementById('confirmOrosBtn');
+        const cancelBtn = document.getElementById('cancelOrosBtn');
+        
+        orosOptions.innerHTML = '';
+        orosNeeded.textContent = coste;
+        
+        const orosSeleccionados = [];
+        let currentCardPromises = [];
+
+        // Cargar datos de las cartas de oro y crear botones
+        orosDisponibles.forEach(async (oroId) => {
+            try {
+                const oro = await getCardData(oroId);
+                if (!oro) return;
+
+                const oroCard = document.createElement('div');
+                oroCard.className = 'oro-selection-card';
+                oroCard.dataset.oroId = oroId;
+                
+                oroCard.innerHTML = `
+                    <div class="oro-card-checkbox">
+                        <input type="checkbox" id="oro_${oroId}" data-oro-id="${oroId}">
+                        <label for="oro_${oroId}" class="oro-card-label">
+                            ${oro.imagenUrl || oro.imagen ? `
+                                <div class="oro-card-image">
+                                    <img src="${oro.imagenUrl || `/images/${oro.imagen}`}" 
+                                         alt="${oro.nombre}" 
+                                         onerror="this.style.display='none'">
+                                </div>
+                            ` : ''}
+                            <div class="oro-card-info">
+                                <strong>${oro.nombre}</strong>
+                                ${oro.textoHabilidad ? `<div class="oro-card-texto">${oro.textoHabilidad}</div>` : ''}
+                            </div>
+                        </label>
+                    </div>
+                `;
+
+                const checkbox = oroCard.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', (e) => {
+                    const id = e.target.dataset.oroId;
+                    if (e.target.checked) {
+                        if (orosSeleccionados.length < coste) {
+                            orosSeleccionados.push(id);
+                            oroCard.classList.add('selected');
+                        } else {
+                            e.target.checked = false;
+                            showMessage('Ya has seleccionado suficientes oros', 'warning');
+                        }
+                    } else {
+                        const index = orosSeleccionados.indexOf(id);
+                        if (index > -1) {
+                            orosSeleccionados.splice(index, 1);
+                            oroCard.classList.remove('selected');
+                        }
+                    }
+
+                    // Habilitar/deshabilitar botón de confirmar
+                    confirmBtn.disabled = orosSeleccionados.length !== coste;
+                });
+
+                oroCard.addEventListener('click', (e) => {
+                    if (e.target.tagName !== 'INPUT' && e.target.tagName !== 'LABEL') {
+                        checkbox.click();
+                    }
+                });
+
+                orosOptions.appendChild(oroCard);
+            } catch (error) {
+                console.error(`Error cargando oro ${oroId}:`, error);
+            }
+        });
+
+        // Configurar botones
+        confirmBtn.onclick = () => {
+            if (orosSeleccionados.length === coste) {
+                modal.style.display = 'none';
+                resolve(orosSeleccionados);
+            }
+        };
+
+        cancelBtn.onclick = () => {
+            modal.style.display = 'none';
+            resolve(null);
+        };
+
+        // Cerrar al hacer clic fuera del modal
+        modal.onclick = (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                resolve(null);
+            }
+        };
+
+        // Mostrar modal
+        modal.style.display = 'flex';
     });
 }
 

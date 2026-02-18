@@ -20,3 +20,13 @@ Thumbs.db
 .env
 .env.local
 
+# Bases de datos SQLite temporales
+*.db-shm
+*.db-wal
+
+# Archivos personales
+PrintCards/
+gemas.md
+wow druida heal optimizacion gemas icc10.md
+wow druida.md
+wow equipo druida heal.md

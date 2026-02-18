@@ -206,3 +206,5 @@ console.error(`Cartas analizadas: ${cards.length}, con sugerencias: ${suggestion
 
 
 
+
+
