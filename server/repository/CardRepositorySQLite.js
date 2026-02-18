@@ -8,8 +8,7 @@ const path = require('path');
 
 class CardRepositorySQLite {
     constructor(dbPath = null) {
-        // Usar la base de datos unificada por defecto
-        const defaultPath = path.join(__dirname, '..', 'data', 'game.db');
+        const defaultPath = process.env.DATABASE_PATH || path.join(__dirname, '..', 'data', 'game.db');
         this.dbPath = dbPath || defaultPath;
         this.db = new Database(this.dbPath, { readonly: false });
         
